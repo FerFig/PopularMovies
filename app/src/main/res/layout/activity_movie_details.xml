@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.constraint.ConstraintLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context="com.ferfig.popularmovies.MovieDetails">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Shawshank Redemption"/>
+
+        <ImageView
+            android:id="@+id/ivPoster"
+            android:layout_width="210dp"
+            android:layout_height="315dp"
+            android:layout_marginTop="16dp"
+            android:contentDescription="@string/detail_movie_poster_image_content_description"
+            app:layout_constraintStart_toStartOf="@+id/tvTitle"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+            app:srcCompat="@android:color/darker_gray"/>
+
+        <TextView
+            android:id="@+id/tvRelDateLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/rel_date_label"
+            android:textColor="@color/colorPrimaryDark"
+            app:layout_constraintStart_toEndOf="@+id/ivPoster"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitle"/>
+
+        <TextView
+            android:id="@+id/tvRelDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintBottom_toTopOf="@+id/tvRelDateLabel"
+            app:layout_constraintStart_toEndOf="@+id/tvRelDateLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvRelDateLabel"
+            tools:text="1994/01/13"/>
+
+        <TextView
+            android:id="@+id/tvAvgRateLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/colorPrimaryDark"
+            android:text="@string/avg_rate_label"
+            app:layout_constraintStart_toStartOf="@+id/tvRelDateLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvRelDateLabel"/>
+
+        <TextView
+            android:id="@+id/tvAvgRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorAccent"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/tvAvgRateLabel"
+            app:layout_constraintStart_toEndOf="@+id/tvAvgRateLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvAvgRateLabel"
+            tools:text="9.3/10"/>
+
+        <TextView
+            android:id="@+id/tvSynopsysLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/synopsis_label"
+            android:textColor="@color/colorPrimaryDark"
+            app:layout_constraintStart_toStartOf="@+id/ivPoster"
+            app:layout_constraintTop_toBottomOf="@+id/ivPoster"/>
+
+        <TextView
+            android:id="@+id/tvSynopsys"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tvSynopsysLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvSynopsysLabel"
+            tools:text="Bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla"/>
+
+    </android.support.constraint.ConstraintLayout>
+</ScrollView>

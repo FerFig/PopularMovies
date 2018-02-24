@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Popular Movies by FF</string>
+    <string name="movie_details_activity_title">Movie Details</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+    <string name="pref_sort_by">Sort Movies By</string>
+    <string-array name="pref_sort_by_options">
+        <item>Top Rated</item>
+        <item>Popular</item>
+    </string-array>
+    <string-array name="pref_sort_by_values">
+        <item>1</item>
+        <item>0</item>
+    </string-array>
+
+    <!-- Strings related to Movie Detail activity -->
+    <string name="synopsis_label">Synopsis</string>
+    <string name="avg_rate_label">Rate:</string>
+    <string name="rel_date_label">Rel.:</string>
+    <string name="avg_rate_label_on_details">Average Rating:</string>
+    <string name="rel_date_label_on_details">Release Date:</string>
+    <string name="detail_movie_poster_image_content_description">Movie Poster</string>
+    <string name="error_message_text">Oops!!\n\nSomething went wrong.\nSorry for the inconvenient!\n\nPlease restart the app,\nor choose other Sorting Option.</string>
+</resources>
