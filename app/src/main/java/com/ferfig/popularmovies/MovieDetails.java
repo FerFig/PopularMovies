@@ -8,29 +8,39 @@ import android.widget.TextView;
 import com.ferfig.popularmovies.model.MovieData;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MovieDetails extends AppCompatActivity {
 
     private static final String MAX_RATE = "/10";
+
+    @BindView(R.id.ivPoster) ImageView ivPoster;
+    @BindView(R.id.tvTitle) TextView tvTitle;
+    @BindView(R.id.tvAvgRate) TextView tvAvgRate;
+    @BindView(R.id.tvRelDate) TextView tvRelDate;
+    @BindView(R.id.tvSynopsys) TextView tvSynopsis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
 
-        Intent receivedIntent = getIntent();
-        MovieData movieDetails = (MovieData) receivedIntent.getSerializableExtra("MovieDetails");
+        ButterKnife.bind(this);
 
-        ImageView ivPoster = findViewById(R.id.ivPoster);
+        Intent receivedIntent = getIntent();
+        MovieData movieDetails = receivedIntent.getParcelableExtra("MovieDetails");
+
         Picasso.with(this).load(
                 movieDetails.getPoster()).into(ivPoster);
         //also set the content description of the movie image/thumbnail to the movie title ;)
         ivPoster.setContentDescription(movieDetails.getTitle());
 
         String avgRate = movieDetails.getVoteAverage() + MAX_RATE;
-        ((TextView)findViewById(R.id.tvTitle)).setText(movieDetails.getTitle());
-        ((TextView)findViewById(R.id.tvAvgRate)).setText(avgRate);
-        ((TextView)findViewById(R.id.tvRelDate)).setText(movieDetails.getReleaseDate());
-        ((TextView)findViewById(R.id.tvSynopsys)).setText(movieDetails.getSynopsis());
+        tvTitle.setText(movieDetails.getTitle());
+        tvAvgRate.setText(avgRate);
+        tvRelDate.setText(movieDetails.getReleaseDate());
+        tvSynopsis.setText(movieDetails.getSynopsis());
 
     }
 }

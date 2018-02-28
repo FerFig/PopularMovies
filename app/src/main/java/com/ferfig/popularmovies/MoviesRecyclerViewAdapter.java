@@ -1,7 +1,6 @@
 package com.ferfig.popularmovies;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,15 +13,24 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecyclerViewAdapter.MovieViewHolder> {
 
     private final Context mContext;
 
     private final List<MovieData> mData;
 
-    public MoviesRecyclerViewAdapter(Context mContext, List<MovieData> mData) {
+    public interface OnItemClickListener {
+        void onItemClick(MovieData movieData);
+    }
+    private final OnItemClickListener itemClickListener;
+
+    public MoviesRecyclerViewAdapter(Context mContext, List<MovieData> mData, OnItemClickListener listener) {
         this.mContext = mContext;
         this.mData = mData;
+        this.itemClickListener = listener;
     }
 
     @Override
@@ -34,26 +42,7 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
 
     @Override
     public void onBindViewHolder(MovieViewHolder holder, final int position) {
-        Picasso.with(mContext).load(
-                mData.get(position).getPoster()).into(holder.movieImage);
-
-        //set the content description of the movie image/thumbnail to the movie title ;)
-        holder.movieImage.setContentDescription(mData.get(position).getTitle());
-
-        holder.movieCardView.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v) {
-                    //prepare the intent to call detail activity
-                    Intent movieDetailIntent = new Intent(mContext, MovieDetails.class);
-                    //get (Serializable) movie object
-                    MovieData mDtl = mData.get(position);
-                    //And send it to the detail activity
-                    movieDetailIntent.putExtra("MovieDetails", mDtl);
-                    mContext.startActivity(movieDetailIntent);
-                }
-            }
-        );
-
+        holder.bind(mData.get(position), itemClickListener);
     }
 
     @Override
@@ -61,17 +50,31 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
         return mData.size();
     }
 
-    public static class MovieViewHolder extends RecyclerView.ViewHolder{
+    public class MovieViewHolder extends RecyclerView.ViewHolder{
 
-        final ImageView movieImage;
-        final CardView movieCardView;
+        @BindView(R.id.vwMovieImageId) ImageView movieImage;
+        @BindView(R.id.movieCardViewId) CardView movieCardView;
 
-        public MovieViewHolder(View itemView) {
-            super(itemView);
+        public MovieViewHolder(View movieItemView) {
+            super(movieItemView);
 
-            movieImage = itemView.findViewById(R.id.vwMovieImageId);
-            movieCardView = itemView.findViewById(R.id.movieCardViewId);
+            ButterKnife.bind(this, movieItemView);
         }
+
+        public void bind(final MovieData movieData, final OnItemClickListener listener) {
+            Picasso.with(mContext).load(
+                    movieData.getPoster()).into(movieImage);
+
+            //set the content description of the movie image/thumbnail to the movie title ;)
+            movieImage.setContentDescription(movieData.getTitle());
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    listener.onItemClick(movieData);
+                }
+            });
+        }
+
     }
 
 }

@@ -1,8 +1,9 @@
 package com.ferfig.popularmovies.model;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public final class MovieData implements Serializable{
+public final class MovieData implements Parcelable {
 
     private String mTitle;
     private String mReleaseDate;
@@ -24,6 +25,26 @@ public final class MovieData implements Serializable{
         this.setVoteAverage(vote_average);
         this.setSynopsis(synopsis);
     }
+
+    private MovieData(Parcel in) {
+        mTitle = in.readString();
+        mReleaseDate = in.readString();
+        mPoster = in.readString();
+        mVoteAverage = in.readString();
+        mSynopsis = in.readString();
+    }
+
+    public static final Creator<MovieData> CREATOR = new Creator<MovieData>() {
+        @Override
+        public MovieData createFromParcel(Parcel in) {
+            return new MovieData(in);
+        }
+
+        @Override
+        public MovieData[] newArray(int size) {
+            return new MovieData[size];
+        }
+    };
 
     /** getters **/
     public String getTitle() {
@@ -63,5 +84,19 @@ public final class MovieData implements Serializable{
 
     public void setSynopsis(String mSynopsis) {
         this.mSynopsis = mSynopsis;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mTitle);
+        dest.writeString(mReleaseDate);
+        dest.writeString(mPoster);
+        dest.writeString(mVoteAverage);
+        dest.writeString(mSynopsis);
     }
 }

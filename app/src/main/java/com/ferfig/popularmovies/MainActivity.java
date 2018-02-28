@@ -27,17 +27,19 @@ import com.ferfig.popularmovies.utils.Utils;
 import java.net.URL;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity implements LoaderCallbacks<String>,
         SharedPreferences.OnSharedPreferenceChangeListener
 {
-
     private static final int MOVIEDB_LOADER_ID = 27;
 
     private List<MovieData> mMoviesList;
 
-    private RecyclerView mMainRecyclerView;
-    private ProgressBar mProgressBar;
-    private TextView mErrorMessage;
+    @BindView(R.id.rvMainRecyclerView) RecyclerView mMainRecyclerView;
+    @BindView(R.id.pbProgress) ProgressBar mProgressBar;
+    @BindView(R.id.tvErrorMessage) TextView mErrorMessage;
 
     private String mCurrentSortOrder;
 
@@ -46,9 +48,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mMainRecyclerView = findViewById(R.id.rvMainRecyclerView);
-        mProgressBar = findViewById(R.id.pbProgress);
-        mErrorMessage = findViewById(R.id.tvErrorMessage);
+        ButterKnife.bind(this);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
@@ -61,11 +61,17 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
 
     private void getDataFromMovieDB(String sortOrder) {
         HideMovieGrid();
-        // retrieve movies data with loader
-        LoaderCallbacks<String> callback = MainActivity.this;
-        Bundle bundleForLoader = new Bundle();
-        bundleForLoader.putString(getString(R.string.pref_sort_by), sortOrder);
-        getSupportLoaderManager().restartLoader(MOVIEDB_LOADER_ID, bundleForLoader, callback);
+        if (Utils.isInternetConectionAvailable(this)) {
+            // retrieve movies data with loader
+            LoaderCallbacks<String> callback = MainActivity.this;
+            Bundle bundleForLoader = new Bundle();
+            bundleForLoader.putString(getString(R.string.pref_sort_by), sortOrder);
+            getSupportLoaderManager().restartLoader(MOVIEDB_LOADER_ID, bundleForLoader, callback);
+        }
+        else
+        {
+            showErrorMessage(R.string.no_internet_connection_error_msg);
+        }
     }
 
     @Override
@@ -96,12 +102,13 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
             @Override
             public String loadInBackground() {
                 try {
-                    String sortBy = "0"; //default Popular;
+                    String moviesSortedBy = "0"; //default Popular;
                     if (bundle.containsKey(getString(R.string.pref_sort_by))) {
-                        sortBy = bundle.getString(getString(R.string.pref_sort_by));
+                        moviesSortedBy = bundle.getString(getString(R.string.pref_sort_by));
+                        if (moviesSortedBy==null) moviesSortedBy="0";
                     }
                     URL url;
-                    switch (sortBy){
+                    switch (moviesSortedBy){
                         case "1":
                             url = UrlUtils.buildUrl(UrlUtils.TOP_RATED_MOVIES_URL);
                             break;
@@ -130,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
             mMoviesList = Json.getMoviesList(data);
             ShowMovieGrid();
         } else {
-            showErrorMessage();
+            showErrorMessage(R.string.error_message_text);
         }
     }
 
@@ -158,17 +165,25 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
 
         int numColumns = Utils.getDeviceSpanByOrientation(this);
 
-        RecyclerView mainMoviesRecyclerView = findViewById(R.id.rvMainRecyclerView);
+        MoviesRecyclerViewAdapter mainMoviesAdapter = new MoviesRecyclerViewAdapter(this, mMoviesList,
+                new MoviesRecyclerViewAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(MovieData movieData) {
+                //prepare the intent to call detail activity
+                Intent movieDetailIntent = new Intent(getApplicationContext(), MovieDetails.class);
+                //And send it to the detail activity
+                movieDetailIntent.putExtra("MovieDetails", movieData);
+                startActivity(movieDetailIntent);
+            }
+        });
 
-        MoviesRecyclerViewAdapter mainMoviesAdapter = new MoviesRecyclerViewAdapter(this, mMoviesList);
-
-        mainMoviesRecyclerView.setLayoutManager(new GridLayoutManager(
+        mMainRecyclerView.setLayoutManager(new GridLayoutManager(
                 this,
                 numColumns,
                 OrientationHelper.VERTICAL,
                 false));
 
-        mainMoviesRecyclerView.setAdapter(mainMoviesAdapter);
+        mMainRecyclerView.setAdapter(mainMoviesAdapter);
     }
 
     private void HideMovieGrid() {
@@ -177,10 +192,11 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
         mMainRecyclerView.setVisibility(View.GONE);
     }
 
-    private void showErrorMessage() {
+    private void showErrorMessage(int res_error_message) {
         /* First, hide the currently visible data */
         mProgressBar.setVisibility(View.GONE);
         mMainRecyclerView.setVisibility(View.GONE);
+        mErrorMessage.setText(res_error_message);
         mErrorMessage.setVisibility(View.VISIBLE);
     }
 
