@@ -23,4 +23,8 @@
     <string name="detail_movie_poster_image_content_description">Movie Poster</string>
     <string name="error_message_text">Oops!!\n\nSomething went wrong.\nSorry for the inconvenient!\n\nPlease restart the app,\nor choose other Sorting Option.</string>
     <string name="no_internet_connection_error_msg">No internet connection found!\nPlease make sure that you have an internet connection available.</string>
+    <string name="trailers_label">Trailers</string>
+    <string name="reviews_label">Reviews</string>
+    <string name="reviewer_label">Reviewer:</string>
+    <string name="review_label">Review:</string>
 </resources>
