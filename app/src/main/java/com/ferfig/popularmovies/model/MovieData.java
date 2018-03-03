@@ -3,6 +3,8 @@ package com.ferfig.popularmovies.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 public final class MovieData implements Parcelable {
 
     private String mId;
@@ -11,8 +13,8 @@ public final class MovieData implements Parcelable {
     private String mPoster;
     private String mVoteAverage;
     private String mSynopsis;
-    private Trailer[] mTrailers;
-    private Review[] mReviews;
+    private ArrayList<Trailer> mTrailers;
+    private ArrayList<Review> mReviews;
 
     private static final String IMAGES_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String POSTER_WSIZE = "w185/";
@@ -34,8 +36,10 @@ public final class MovieData implements Parcelable {
         mPoster = in.readString();
         mVoteAverage = in.readString();
         mSynopsis = in.readString();
-        mTrailers = (Trailer[]) in.readArray(Trailer.class.getClassLoader());
-        mReviews = (Review[]) in.readArray(Review.class.getClassLoader());
+        mTrailers = new ArrayList<>();
+        in.readTypedList(mTrailers, Trailer.CREATOR);
+        mReviews = new ArrayList<>();
+        in.readTypedList(mReviews, Review.CREATOR);
     }
 
     @Override
@@ -46,8 +50,8 @@ public final class MovieData implements Parcelable {
         dest.writeString(mPoster);
         dest.writeString(mVoteAverage);
         dest.writeString(mSynopsis);
-        dest.writeArray(mTrailers);
-        dest.writeArray(mReviews);
+        dest.writeList(mTrailers);
+        dest.writeList(mReviews);
     }
 
     public static final Creator<MovieData> CREATOR = new Creator<MovieData>() {
@@ -88,9 +92,9 @@ public final class MovieData implements Parcelable {
         return mSynopsis;
     }
 
-    public Trailer[] getTrailers() { return mTrailers ; }
+    public ArrayList<Trailer> getTrailers() { return mTrailers ; }
 
-    public Review[] getReviews() { return mReviews; }
+    public ArrayList<Review> getReviews() { return mReviews; }
 
 
     /** setters **/
@@ -114,7 +118,7 @@ public final class MovieData implements Parcelable {
         this.mSynopsis = mSynopsis;
     }
 
-    public void setTrailers(Trailer[] mTrailers) { this.mTrailers = mTrailers; }
+    public void setTrailers(ArrayList<Trailer> mTrailers) { this.mTrailers = mTrailers; }
 
-    public void setReviews(Review[] mReviews) { this.mReviews = mReviews; }
+    public void setReviews(ArrayList<Review> mReviews) { this.mReviews = mReviews; }
 }

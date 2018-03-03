@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="match_parent">
+
     <android.support.constraint.ConstraintLayout
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:context="com.ferfig.popularmovies.MovieDetails">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context="com.ferfig.popularmovies.MovieDetails">
 
         <TextView
             android:id="@+id/tvTitle"
@@ -37,61 +36,61 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@android:color/darker_gray"/>
 
-            <TextView
-                android:id="@+id/tvRelDateLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/rel_date_label_on_details"
-                android:textColor="@color/colorPrimaryDark"
-                app:layout_constraintStart_toEndOf="@+id/ivPoster"
-                app:layout_constraintTop_toBottomOf="@+id/tvTitle"/>
-
-            <TextView
-                android:id="@+id/tvRelDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:textColor="@color/colorAccent"
-                app:layout_constraintBottom_toTopOf="@+id/tvRelDateLabel"
-                app:layout_constraintStart_toEndOf="@+id/tvRelDateLabel"
-                app:layout_constraintTop_toBottomOf="@+id/tvRelDateLabel"
-                tools:text="2018/07"/>
-
-            <TextView
-                android:id="@+id/tvAvgRateLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:textColor="@color/colorPrimaryDark"
-                android:text="@string/avg_rate_label_on_details"
-                app:layout_constraintStart_toStartOf="@+id/tvRelDateLabel"
-                app:layout_constraintTop_toBottomOf="@+id/tvRelDateLabel"/>
-
-            <TextView
-                android:id="@+id/tvAvgRate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/colorAccent"
-                android:layout_marginStart="8dp"
-                app:layout_constraintBottom_toTopOf="@+id/tvAvgRateLabel"
-                app:layout_constraintStart_toEndOf="@+id/tvAvgRateLabel"
-                app:layout_constraintTop_toBottomOf="@+id/tvAvgRateLabel"
-                tools:text="9.3/10"/>
-
-            <TextView
-                android:id="@+id/tvSynopsysLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:textColor="@color/colorPrimaryDark"
-                android:text="@string/synopsis_label"
-                app:layout_constraintStart_toStartOf="@+id/tvRelDateLabel"
-                app:layout_constraintTop_toBottomOf="@+id/tvAvgRateLabel"/>
+        <TextView
+            android:id="@+id/tvRelDateLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/rel_date_label_on_details"
+            android:textColor="@color/colorPrimaryDark"
+            app:layout_constraintStart_toEndOf="@+id/ivPoster"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitle"/>
 
         <TextView
-            android:id="@+id/tvSynopsys"
+            android:id="@+id/tvRelDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintBottom_toTopOf="@+id/tvRelDateLabel"
+            app:layout_constraintStart_toEndOf="@+id/tvRelDateLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvRelDateLabel"
+            tools:text="2018/07"/>
+
+        <TextView
+            android:id="@+id/tvAvgRateLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/avg_rate_label_on_details"
+            android:textColor="@color/colorPrimaryDark"
+            app:layout_constraintStart_toStartOf="@+id/tvRelDateLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvRelDateLabel"/>
+
+        <TextView
+            android:id="@+id/tvAvgRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintBottom_toTopOf="@+id/tvAvgRateLabel"
+            app:layout_constraintStart_toEndOf="@+id/tvAvgRateLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvAvgRateLabel"
+            tools:text="9.3/10"/>
+
+        <TextView
+            android:id="@+id/tvSynopsisLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/synopsis_label"
+            android:textColor="@color/colorPrimaryDark"
+            app:layout_constraintStart_toStartOf="@+id/tvRelDateLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvAvgRateLabel"/>
+
+        <TextView
+            android:id="@+id/tvSynopsis"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
@@ -99,8 +98,21 @@
             android:textColor="@color/colorAccent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvRelDateLabel"
-            app:layout_constraintTop_toBottomOf="@+id/tvSynopsysLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvSynopsisLabel"
             tools:text="Bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla"/>
+
+        <ImageView
+            android:id="@+id/imSynopsisSeparator"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@color/colorPrimary"
+            app:layout_constraintBottom_toTopOf="@+id/tvSynopsisLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvSynopsisLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvSynopsisLabel"
+            app:srcCompat="@color/colorPrimaryDark"/>
 
         <TextView
             android:id="@+id/tvTrailersLabel"
@@ -109,10 +121,24 @@
             android:layout_marginTop="16dp"
             android:text="@string/trailers_label"
             android:textColor="@color/colorPrimaryDark"
-            app:layout_constraintStart_toStartOf="@+id/tvSynopsys"
-            app:layout_constraintTop_toBottomOf="@+id/tvSynopsys"
             android:visibility="gone"
-            />
+            app:layout_constraintStart_toStartOf="@+id/tvSynopsis"
+            app:layout_constraintTop_toBottomOf="@+id/tvSynopsis"
+            tools:text="Trailers sdf sdofj asdoigj sdfiogj sdfig dsfioug"/>
+
+        <ImageView
+            android:id="@+id/imTrailersSeparator"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@color/colorPrimary"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/tvTrailersLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvTrailersLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvTrailersLabel"
+            app:srcCompat="@color/colorPrimaryDark"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rvTrailers"
@@ -120,10 +146,10 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvTrailersLabel"
             app:layout_constraintTop_toBottomOf="@+id/tvTrailersLabel"
-            android:visibility="gone"
             >
         </android.support.v7.widget.RecyclerView>
 
@@ -134,23 +160,39 @@
             android:layout_marginTop="16dp"
             android:text="@string/reviews_label"
             android:textColor="@color/colorPrimaryDark"
-            app:layout_constraintStart_toStartOf="@+id/rvTrailers"
-            app:layout_constraintTop_toBottomOf="@+id/rvTrailers"
             android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@+id/ivPoster"
+            app:layout_constraintTop_toBottomOf="@+id/ivPoster"
             />
+
+        <ImageView
+            android:id="@+id/imReviewsSeparator"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@color/colorPrimary"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/tvReviewsLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvReviewsLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvReviewsLabel"
+            app:srcCompat="@color/colorPrimaryDark"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rvReviews"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="0dp"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvReviewsLabel"
             app:layout_constraintTop_toBottomOf="@+id/tvReviewsLabel"
-            android:visibility="gone"
             >
         </android.support.v7.widget.RecyclerView>
     </android.support.constraint.ConstraintLayout>
 </ScrollView>
+

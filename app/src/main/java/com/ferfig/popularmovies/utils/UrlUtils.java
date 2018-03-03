@@ -1,5 +1,8 @@
 package com.ferfig.popularmovies.utils;
 
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 
 import com.ferfig.popularmovies.BuildConfig;
@@ -20,6 +23,10 @@ public class UrlUtils {
     public static final String MOVIE_REVIEWS_URL =
             "https://api.themoviedb.org/3/movie/%1$s/reviews?api_key=" + BuildConfig.MY_THEMOVIEDB_API_KEY;
 
+    public static final String YOUTUBE_APP_URI = "vnd.youtube:";
+
+    public static final String YOUTUBE_WEB_URI = "http://www.youtube.com/watch?v=";
+
     public static URL buildUrl(String movieDbUrl) {
         Uri builtUri = Uri.parse(movieDbUrl).buildUpon().build();
         URL url = null;
@@ -30,5 +37,4 @@ public class UrlUtils {
         }
         return url;
     }
-
 }

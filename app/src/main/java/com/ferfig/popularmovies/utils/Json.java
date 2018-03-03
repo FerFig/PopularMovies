@@ -30,6 +30,7 @@ public final class Json {
     private static final String TRAILER_TYPE = "type";
 
     private static final String VALID_TRAILER_TYPE = "Trailer";
+    private static final String VALID_PROVIDER_TYPE = "YouTube";
 
     private static final String REVIEW_ID = "id";
     private static final String REVIEW_AUTHOR = "author";
@@ -66,24 +67,28 @@ public final class Json {
             String mSynopsis = jsonMainObject.optString(MOVIE_SYNOPSIS);
 
             return new MovieData(mId, mTitle, mReleaseDate,
-                    mPoster, mVoteAverage, mSynopsis);
+                    mPoster, mVoteAverage, mSynopsis.trim());
         } catch (JSONException e) {
             //e.printStackTrace();
             return null;
         }
     }
 
-    public static List<Trailer> getTrailersList(String json) {
+    public static ArrayList<Trailer> getTrailersList(String json) {
         try {
             JSONObject jsonMainObject = new JSONObject(json);
             JSONArray resultsRetrieved = jsonMainObject.optJSONArray(JSON_RESULTS);
             if (resultsRetrieved!=null){
-                List<Trailer> mTrailers = new ArrayList<>();
+                ArrayList<Trailer> mTrailers = new ArrayList<>();
                 for(int i=0; i<resultsRetrieved.length(); i++){
-                    Trailer trailer =parseJsonTrailers(resultsRetrieved.getString(i));
-                    String tType = trailer.getTrailerType();
-                    if (tType != null && tType.equals(VALID_TRAILER_TYPE)) {
-                        mTrailers.add(trailer);
+                    Trailer trailer = parseJsonTrailers(resultsRetrieved.getString(i));
+                    if (trailer != null) {
+                        String tType = trailer.getTrailerType();
+                        String tProvider = trailer.getProvider();
+                        if (tType != null && tType.equals(VALID_TRAILER_TYPE)
+                                && tProvider != null && tProvider.equals(VALID_PROVIDER_TYPE)) {
+                            mTrailers.add(trailer);
+                        }
                     }
                 }
                 return mTrailers;
@@ -113,12 +118,12 @@ public final class Json {
         }
     }
 
-    public static List<Review> getReviewsList(String json) {
+    public static ArrayList<Review> getReviewsList(String json) {
         try {
             JSONObject jsonMainObject = new JSONObject(json);
             JSONArray resultsRetrieved = jsonMainObject.optJSONArray(JSON_RESULTS);
             if (resultsRetrieved!=null){
-                List<Review> mReviews = new ArrayList<>();
+                ArrayList<Review> mReviews = new ArrayList<>();
                 for(int i=0; i<resultsRetrieved.length(); i++){
                     mReviews.add(parseJsonReviews(resultsRetrieved.getString(i)));
                 }
@@ -140,7 +145,7 @@ public final class Json {
             String mContent = jsonMainObject.optString(REVIEW_CONTENT);
             String mURL = jsonMainObject.optString(REVIEW_URL);
 
-            return new Review(mId, mAuthor, mContent, mURL);
+            return new Review(mId, mAuthor, mContent.trim(), mURL);
         } catch (JSONException e) {
             //e.printStackTrace();
             return null;

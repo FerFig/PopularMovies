@@ -8,6 +8,7 @@ import android.view.Surface;
 import android.view.WindowManager;
 
 public final class Utils {
+    public static final String MOVIE_DETAILS_OBJECT = "MovieDetails";
 
     public static int getDeviceSpanByOrientation(Context context){
         if ((context.getSystemService(Context.WINDOW_SERVICE)) != null) {
@@ -17,7 +18,7 @@ public final class Utils {
                 if (display !=null) {
                     int orientation = display.getRotation();
                     if (orientation == Surface.ROTATION_90 || orientation == Surface.ROTATION_270) {
-                        return 5;
+                        return 6;
                     }
                 }
             }

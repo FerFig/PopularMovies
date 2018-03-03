@@ -65,7 +65,9 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
-                    listener.onItemClick(reviewData);
+                    if (listener!=null) {
+                        listener.onItemClick(reviewData);
+                    }
                 }
             });
         }

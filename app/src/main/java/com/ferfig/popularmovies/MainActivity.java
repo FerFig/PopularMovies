@@ -60,12 +60,13 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
     }
 
     private void getDataFromMovieDB(String sortOrder) {
-        HideMovieGrid();
+        hideMovieGrid();
         if (Utils.isInternetConectionAvailable(this)) {
             // retrieve movies data with loader
             LoaderCallbacks<String> callback = MainActivity.this;
             Bundle bundleForLoader = new Bundle();
             bundleForLoader.putString(getString(R.string.pref_sort_by), sortOrder);
+
             getSupportLoaderManager().restartLoader(MOVIEDB_LOADER_ID, bundleForLoader, callback);
         }
         else
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
     public void onLoadFinished(Loader<String> loader, String data) {
         if (null != data) {
             mMoviesList = Json.getMoviesList(data);
-            ShowMovieGrid();
+            showMovieGrid();
         } else {
             showErrorMessage(R.string.error_message_text);
         }
@@ -158,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
         }
     }
 
-    private void ShowMovieGrid() {
+    private void showMovieGrid() {
         mProgressBar.setVisibility(View.GONE);
         mErrorMessage.setVisibility(View.GONE);
         mMainRecyclerView.setVisibility(View.VISIBLE);
@@ -172,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
                 //prepare the intent to call detail activity
                 Intent movieDetailIntent = new Intent(getApplicationContext(), MovieDetails.class);
                 //And send it to the detail activity
-                movieDetailIntent.putExtra("MovieDetails", movieData);
+                movieDetailIntent.putExtra(Utils.MOVIE_DETAILS_OBJECT, movieData);
                 startActivity(movieDetailIntent);
             }
         });
@@ -186,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
         mMainRecyclerView.setAdapter(mainMoviesAdapter);
     }
 
-    private void HideMovieGrid() {
+    private void hideMovieGrid() {
         mProgressBar.setVisibility(View.VISIBLE);
         mErrorMessage.setVisibility(View.GONE);
         mMainRecyclerView.setVisibility(View.GONE);

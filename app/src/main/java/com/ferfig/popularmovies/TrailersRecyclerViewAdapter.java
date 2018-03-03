@@ -64,7 +64,9 @@ public class TrailersRecyclerViewAdapter extends RecyclerView.Adapter<TrailersRe
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
-                    listener.onItemClick(trailerData);
+                    if (listener!=null) {
+                        listener.onItemClick(trailerData);
+                    }
                 }
             });
         }
