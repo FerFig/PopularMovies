@@ -118,12 +118,12 @@
             android:id="@+id/tvTrailersLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:text="@string/trailers_label"
             android:textColor="@color/colorPrimaryDark"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="@+id/tvSynopsis"
-            app:layout_constraintTop_toBottomOf="@+id/tvSynopsis"
+            app:layout_constraintStart_toStartOf="@+id/ivPoster"
+            app:layout_constraintTop_toBottomOf="@+id/ivPoster"
             tools:text="Trailers sdf sdofj asdoigj sdfiogj sdfig dsfioug"/>
 
         <ImageView
@@ -133,7 +133,6 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:background="@color/colorPrimary"
-            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/tvTrailersLabel"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tvTrailersLabel"
@@ -146,7 +145,6 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
-            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvTrailersLabel"
             app:layout_constraintTop_toBottomOf="@+id/tvTrailersLabel"
@@ -157,12 +155,10 @@
             android:id="@+id/tvReviewsLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:text="@string/reviews_label"
             android:textColor="@color/colorPrimaryDark"
-            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@+id/ivPoster"
-            app:layout_constraintTop_toBottomOf="@+id/ivPoster"
+            app:layout_constraintTop_toBottomOf="@+id/rvTrailers"
             />
 
         <ImageView
@@ -172,7 +168,6 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:background="@color/colorPrimary"
-            android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@+id/tvReviewsLabel"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tvReviewsLabel"
@@ -186,13 +181,28 @@
             android:layout_marginStart="0dp"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
-            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvReviewsLabel"
             app:layout_constraintTop_toBottomOf="@+id/tvReviewsLabel"
             >
         </android.support.v7.widget.RecyclerView>
+
+        <ImageView
+            android:id="@+id/ivFavorite"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="16dp"
+            android:adjustViewBounds="false"
+            android:clickable="true"
+            android:cropToPadding="false"
+            android:focusable="true"
+            android:onClick="toogleFavorite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+            app:srcCompat="@mipmap/ic_favorite_on_foreground"/>
+
     </android.support.constraint.ConstraintLayout>
 </ScrollView>
 

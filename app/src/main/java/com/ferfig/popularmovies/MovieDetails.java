@@ -1,7 +1,10 @@
 package com.ferfig.popularmovies;
 
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -16,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ferfig.popularmovies.model.MovieData;
+import com.ferfig.popularmovies.model.MoviesContract;
 import com.ferfig.popularmovies.model.Review;
 import com.ferfig.popularmovies.model.Trailer;
 import com.ferfig.popularmovies.utils.Json;
@@ -44,6 +48,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
     @BindView(R.id.tvAvgRate) TextView tvAvgRate;
     @BindView(R.id.tvRelDate) TextView tvRelDate;
     @BindView(R.id.tvSynopsis) TextView tvSynopsis;
+    @BindView(R.id.ivFavorite) ImageView ivFavorite;
 
     @BindView(R.id.tvTrailersLabel) TextView tvTrailersLabel;
     @BindView(R.id.imSynopsisSeparator) ImageView imSynopsisSeparator;
@@ -66,15 +71,14 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
 
             //Need to get extra data.. Trailers and Reviews
             getDetailsFromMovieDB();
-
-            showMovieDetails(true);
+            //Also need to check if it's Favorite movie
+            setMovieHasFavorite();
         }
         else
         {
             mMovieDetails = savedInstanceState.getParcelable(Utils.MOVIE_DETAILS_OBJECT);
-
-            showMovieDetails(false);
         }
+        showMovieDetails();
     }
 
     @Override
@@ -173,10 +177,10 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
-    private void showMovieDetails(boolean waitForMoreDetails) {
+    private void showMovieDetails() {
         if (mMovieDetails!=null) { //should not happen, but...
             Picasso.with(this).load(
-                    mMovieDetails.getPoster()).into(ivPoster);
+                    mMovieDetails.getDrawablePoster()).into(ivPoster);
             //also set the content description of the movie image/thumbnail to the movie title ;)
             ivPoster.setContentDescription(mMovieDetails.getTitle());
 
@@ -186,9 +190,18 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
             tvRelDate.setText(mMovieDetails.getReleaseDate());
             tvSynopsis.setText(mMovieDetails.getSynopsis());
 
-            if (!waitForMoreDetails) {
-                showTrailersAndReviews();
+            if (mMovieDetails.isFavorite()) {
+                //ivFavorite.setImageResource(R.mipmap.ic_favorite_on_foreground);
+                Picasso.with(this).load(
+                        R.mipmap.ic_favorite_on_foreground).into(ivFavorite);
             }
+            else {
+                //ivFavorite.setImageResource(R.mipmap.ic_favorite_off_foreground);
+                Picasso.with(this).load(
+                        R.mipmap.ic_favorite_off_foreground).into(ivFavorite);
+            }
+
+            showTrailersAndReviews();
         }
     }
 
@@ -227,6 +240,12 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
             tvTrailersLabel.setVisibility(View.VISIBLE);
             rvTrailers.setVisibility(View.VISIBLE);
         }
+        else{
+            //cant make them GONE because of the constraints, else we had to set the related view constraints...
+            imTrailersSeparator.setVisibility(View.INVISIBLE);
+            tvTrailersLabel.setVisibility(View.INVISIBLE);
+            rvTrailers.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void showReviews() {
@@ -245,12 +264,81 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
             tvReviewsLabel.setVisibility(View.VISIBLE);
             rvReviews.setVisibility(View.VISIBLE);
         }
+        else{
+            //cant make them GONE because of the constraints, else we had to set the related view constraints...
+            imReviewsSeparator.setVisibility(View.GONE);
+            tvReviewsLabel.setVisibility(View.GONE);
+            rvReviews.setVisibility(View.GONE);
+        }
     }
 
     private void hideMovieDetails() {
         //TODO
-        //mProgressBar.setVisibility(View.VISIBLE);
-        //mErrorMessage.setVisibility(View.GONE);
-        //mMainRecyclerView.setVisibility(View.GONE);
+    }
+
+    public void toogleFavorite(View view) {
+        if (mMovieDetails.isFavorite()){
+            if (deleteMovieFromLocalDB()) {
+//            ivFavorite.setImageResource(R.mipmap.ic_favorite_off_foreground);
+                Picasso.with(this).load(
+                        R.mipmap.ic_favorite_off_foreground).into(ivFavorite);
+            }
+        }
+        else{
+            if (addMovieToLocalDB()) {
+//            ivFavorite.setImageResource(R.drawable.ic_favorite_on_background);
+                Picasso.with(this).load(
+                        R.mipmap.ic_favorite_on_foreground).into(ivFavorite);
+            }
+
+        }
+        mMovieDetails.setFavorite(!mMovieDetails.isFavorite());
+    }
+
+    private boolean addMovieToLocalDB() {
+        ContentValues cv = new ContentValues();
+        cv.put(MoviesContract.MoviesEntry._ID, mMovieDetails.getId());
+        cv.put(MoviesContract.MoviesEntry.COLUMN_TITLE, mMovieDetails.getTitle());
+        cv.put(MoviesContract.MoviesEntry.COLUMN_POSTER, mMovieDetails.getPoster());
+        cv.put(MoviesContract.MoviesEntry.COLUMN_RELEASE_DATE, mMovieDetails.getReleaseDate());
+        cv.put(MoviesContract.MoviesEntry.COLUMN_REVIEWS, mMovieDetails.getReviewsInJson());
+        cv.put(MoviesContract.MoviesEntry.COLUMN_SYNOPSIS, mMovieDetails.getSynopsis());
+        cv.put(MoviesContract.MoviesEntry.COLUMN_TRAILERS, mMovieDetails.getTrailersInJson());
+        cv.put(MoviesContract.MoviesEntry.COLUMN_VOTE_AVERAGE, mMovieDetails.getVoteAverage());
+        cv.put(MoviesContract.MoviesEntry.COLUMN_BACKDROP_IMAGE, mMovieDetails.getBackDropImage());
+
+        ContentResolver cr = getContentResolver();
+        Uri uriInserted = cr.insert(MoviesContract.MoviesEntry.CONTENT_URI, cv);
+
+        if (uriInserted!=null)
+            return true;
+        else
+            return false;
+    }
+
+    private boolean deleteMovieFromLocalDB() {
+        ContentResolver cr = getContentResolver();
+        long movieId = Long.parseLong(mMovieDetails.getId());
+        Uri movieToDelete = MoviesContract.MoviesEntry.buildMoviesUri(movieId);
+        int nDeleted = cr.delete(movieToDelete, null, null);
+        return nDeleted>0;
+    }
+
+    private void setMovieHasFavorite() {
+        ContentResolver cr = getContentResolver();
+        long movieId = Long.parseLong(mMovieDetails.getId());
+        Uri movieToGet = MoviesContract.MoviesEntry.buildMoviesUri(movieId);
+        Cursor nCursor = cr.query(movieToGet, null, null,null,null);
+        if (nCursor != null && nCursor.getCount()>0) {
+            mMovieDetails.setFavorite(true);
+            Picasso.with(this).load(
+                    R.mipmap.ic_favorite_on_foreground).into(ivFavorite);
+        }
+        else {
+            mMovieDetails.setFavorite(false);
+            Picasso.with(this).load(
+                    R.mipmap.ic_favorite_off_foreground).into(ivFavorite);
+        }
+        if (nCursor != null) nCursor.close();
     }
 }

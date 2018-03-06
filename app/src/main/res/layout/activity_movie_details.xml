@@ -122,7 +122,6 @@
             android:textColor="@color/colorPrimaryDark"
             app:layout_constraintStart_toStartOf="@+id/tvSynopsis"
             app:layout_constraintTop_toBottomOf="@+id/tvSynopsis"
-            android:visibility="gone"
             />
 
         <ImageView
@@ -136,8 +135,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tvTrailersLabel"
             app:layout_constraintTop_toBottomOf="@+id/tvTrailersLabel"
-            app:srcCompat="@color/colorPrimaryDark"
-            android:visibility="gone"/>
+            app:srcCompat="@color/colorPrimaryDark"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rvTrailers"
@@ -147,8 +145,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvTrailersLabel"
-            app:layout_constraintTop_toBottomOf="@+id/tvTrailersLabel"
-            android:visibility="gone">
+            app:layout_constraintTop_toBottomOf="@+id/tvTrailersLabel">
         </android.support.v7.widget.RecyclerView>
 
         <TextView
@@ -160,7 +157,6 @@
             android:textColor="@color/colorPrimaryDark"
             app:layout_constraintStart_toStartOf="@+id/rvTrailers"
             app:layout_constraintTop_toBottomOf="@+id/rvTrailers"
-            android:visibility="gone"
             />
 
         <ImageView
@@ -174,8 +170,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/tvReviewsLabel"
             app:layout_constraintTop_toBottomOf="@+id/tvReviewsLabel"
-            app:srcCompat="@color/colorPrimaryDark"
-            android:visibility="gone"/>
+            app:srcCompat="@color/colorPrimaryDark"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rvReviews"
@@ -184,12 +179,26 @@
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
-            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvReviewsLabel"
             app:layout_constraintTop_toBottomOf="@+id/tvReviewsLabel">
         </android.support.v7.widget.RecyclerView>
+
+        <ImageView
+            android:id="@+id/ivFavorite"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="8dp"
+            android:adjustViewBounds="false"
+            android:clickable="true"
+            android:cropToPadding="false"
+            android:focusable="true"
+            android:onClick="toogleFavorite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvAvgRate"
+            app:srcCompat="@mipmap/ic_favorite_on_foreground"/>
 
     </android.support.constraint.ConstraintLayout>
 </ScrollView>

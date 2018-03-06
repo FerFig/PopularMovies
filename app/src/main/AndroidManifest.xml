@@ -34,6 +34,11 @@
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity">
         </activity>
+        <provider android:name=".model.MoviesProvider"
+                  android:authorities="com.ferfig.popularmovies"
+                  android:exported="false">
+        </provider>
+
     </application>
 
 </manifest>

@@ -63,7 +63,7 @@ public class MoviesRecyclerViewAdapter extends RecyclerView.Adapter<MoviesRecycl
 
         public void bind(final MovieData movieData, final OnItemClickListener listener) {
             Picasso.with(mContext).load(
-                    movieData.getPoster()).into(movieImage);
+                    movieData.getDrawablePoster()).into(movieImage);
 
             //set the content description of the movie image/thumbnail to the movie title ;)
             movieImage.setContentDescription(movieData.getTitle());

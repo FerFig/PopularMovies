@@ -1,7 +1,9 @@
 package com.ferfig.popularmovies;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -19,12 +21,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ferfig.popularmovies.model.MovieData;
+import com.ferfig.popularmovies.model.MoviesContract;
 import com.ferfig.popularmovies.utils.Json;
 import com.ferfig.popularmovies.utils.Network;
 import com.ferfig.popularmovies.utils.UrlUtils;
 import com.ferfig.popularmovies.utils.Utils;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -33,7 +37,9 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements LoaderCallbacks<String>,
         SharedPreferences.OnSharedPreferenceChangeListener
 {
-    private static final int MOVIEDB_LOADER_ID = 27;
+    private static final int MOVIEDB_LOADER_ID = 26;
+    private static final int LOCALDB_LOADER_ID = 27;
+    private static final String LOCALDB_USED = "LOADERRESULTSSKIP";
 
     private List<MovieData> mMoviesList;
 
@@ -52,20 +58,18 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        String sortOrder = sharedPreferences.getString(getString(R.string.pref_sort_by), "0");
+        mCurrentSortOrder = sharedPreferences.getString(getString(R.string.pref_sort_by), "0");
 
-        mCurrentSortOrder = sortOrder;
-
-        getDataFromMovieDB(sortOrder);
+        getMoviesData();
     }
 
-    private void getDataFromMovieDB(String sortOrder) {
+    private void getDataFromMovieDB() {
         hideMovieGrid();
         if (Utils.isInternetConectionAvailable(this)) {
             // retrieve movies data with loader
             LoaderCallbacks<String> callback = MainActivity.this;
             Bundle bundleForLoader = new Bundle();
-            bundleForLoader.putString(getString(R.string.pref_sort_by), sortOrder);
+            bundleForLoader.putString(getString(R.string.pref_sort_by), mCurrentSortOrder);
 
             getSupportLoaderManager().restartLoader(MOVIEDB_LOADER_ID, bundleForLoader, callback);
         }
@@ -73,6 +77,12 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
         {
             showErrorMessage(R.string.no_internet_connection_error_msg);
         }
+    }
+
+    private void getDataFromLocalDB() {
+        hideMovieGrid();
+        LoaderCallbacks<String> callback = MainActivity.this;
+        getSupportLoaderManager().restartLoader(LOCALDB_LOADER_ID, null, callback);
     }
 
     @Override
@@ -103,21 +113,45 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
             @Override
             public String loadInBackground() {
                 try {
-                    String moviesSortedBy = "0"; //default Popular;
-                    if (bundle.containsKey(getString(R.string.pref_sort_by))) {
-                        moviesSortedBy = bundle.getString(getString(R.string.pref_sort_by));
-                        if (moviesSortedBy==null) moviesSortedBy="0";
+                    if (getId() == LOCALDB_LOADER_ID){
+                        ContentResolver resolver = getContentResolver();
+                        Cursor cursor = resolver.query(
+                                MoviesContract.MoviesEntry.CONTENT_URI, null,null,null,null);
+                        mMoviesList = new ArrayList<>();
+                        if (cursor!=null) {
+                            while (cursor.moveToNext()) {
+                                mMoviesList.add(new MovieData(
+                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry._ID)),
+                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TITLE)),
+                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_RELEASE_DATE)),
+                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_POSTER)),
+                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_BACKDROP_IMAGE)),
+                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_VOTE_AVERAGE)),
+                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_SYNOPSIS))
+                                        )
+                                );
+                            }
+                            cursor.close();
+                        }
+                        return "";
                     }
-                    URL url;
-                    switch (moviesSortedBy){
-                        case "1":
-                            url = UrlUtils.buildUrl(UrlUtils.TOP_RATED_MOVIES_URL);
-                            break;
-                        default:
-                            url = UrlUtils.buildUrl(UrlUtils.POPULAR_MOVIES_URL);
-                        break;
+                    else {
+                        String moviesSortedBy = "0"; //default Popular;
+                        if (bundle.containsKey(getString(R.string.pref_sort_by))) {
+                            moviesSortedBy = bundle.getString(getString(R.string.pref_sort_by));
+                            if (moviesSortedBy == null) moviesSortedBy = "0";
+                        }
+                        URL url;
+                        switch (moviesSortedBy) {
+                            case "1":
+                                url = UrlUtils.buildUrl(UrlUtils.TOP_RATED_MOVIES_URL);
+                                break;
+                            default:
+                                url = UrlUtils.buildUrl(UrlUtils.POPULAR_MOVIES_URL);
+                                break;
+                        }
+                        return Network.getResponseFromHttpUrl(url);
                     }
-                    return Network.getResponseFromHttpUrl(url);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
@@ -126,7 +160,9 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
 
             @Override
             public void deliverResult(String data) {
-                mMoviesData = data;
+                if (getId() == MOVIEDB_LOADER_ID){
+                    mMoviesData = data;
+                }
                 super.deliverResult(data);
             }
         };
@@ -135,7 +171,9 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
         if (null != data) {
-            mMoviesList = Json.getMoviesList(data);
+            if (loader.getId()==MOVIEDB_LOADER_ID) {
+                mMoviesList = Json.getMoviesList(data);
+            }
             showMovieGrid();
         } else {
             showErrorMessage(R.string.error_message_text);
@@ -154,8 +192,20 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
             if (!mCurrentSortOrder.equals(sharedPreferences.getString(key, mCurrentSortOrder))){
                 //if it has changed...
                 mCurrentSortOrder = sharedPreferences.getString(key, mCurrentSortOrder);
-                getDataFromMovieDB(mCurrentSortOrder);
+
+                getMoviesData();
             }
+        }
+    }
+
+    private void getMoviesData() {
+        switch (mCurrentSortOrder) {
+            case "2":
+                getDataFromLocalDB();
+                break;
+            default:
+                getDataFromMovieDB();
+                break;
         }
     }
 

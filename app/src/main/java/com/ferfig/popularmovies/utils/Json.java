@@ -19,6 +19,7 @@ public final class Json {
     private static final String MOVIE_TITLE = "title";
     private static final String MOVIE_RELEASE_DATE = "release_date";
     private static final String MOVIE_POSTER = "poster_path";
+    private static final String MOVIE_BACKDROP_IMAGE = "backdrop_path";
     private static final String MOVIE_VOTE_AVG = "vote_average";
     private static final String MOVIE_SYNOPSIS = "overview";
 
@@ -63,11 +64,12 @@ public final class Json {
             String mTitle = jsonMainObject.optString(MOVIE_TITLE);
             String mReleaseDate = jsonMainObject.optString(MOVIE_RELEASE_DATE);
             String mPoster = jsonMainObject.optString(MOVIE_POSTER);
+            String mBackDropImage = jsonMainObject.optString(MOVIE_BACKDROP_IMAGE);
             String mVoteAverage = jsonMainObject.optString(MOVIE_VOTE_AVG);
             String mSynopsis = jsonMainObject.optString(MOVIE_SYNOPSIS);
 
             return new MovieData(mId, mTitle, mReleaseDate,
-                    mPoster, mVoteAverage, mSynopsis.trim());
+                    mPoster, mBackDropImage, mVoteAverage, mSynopsis.trim());
         } catch (JSONException e) {
             //e.printStackTrace();
             return null;
