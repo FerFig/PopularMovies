@@ -149,7 +149,7 @@ public class MoviesProvider extends ContentProvider {
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
         final SQLiteDatabase db = mMoviesDb.getWritableDatabase();
-        int numUpd = 0;
+        int numUpd;
 
         if (values == null){
             throw new IllegalArgumentException("Cannot have null content values");

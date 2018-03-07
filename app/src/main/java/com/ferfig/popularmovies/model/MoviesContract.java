@@ -5,8 +5,6 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-import java.util.ArrayList;
-
 public class MoviesContract {
 
     public static final String CONTENT_AUTHORITY = "com.ferfig.popularmovies";

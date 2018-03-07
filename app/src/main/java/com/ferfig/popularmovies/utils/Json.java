@@ -9,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public final class Json {
 
@@ -38,12 +37,12 @@ public final class Json {
     private static final String REVIEW_CONTENT = "content";
     private static final String REVIEW_URL = "url";
 
-    public static List<MovieData> getMoviesList(String json){
+    public static ArrayList<MovieData> getMoviesList(String json){
         try {
             JSONObject jsonMainObject = new JSONObject(json);
             JSONArray moviesRetrieved = jsonMainObject.optJSONArray(JSON_RESULTS);
             if (moviesRetrieved!=null){
-                List<MovieData> mMovies = new ArrayList<>();
+                ArrayList<MovieData> mMovies = new ArrayList<>();
                 for(int i=0; i<moviesRetrieved.length(); i++){
                     mMovies.add(parseJsonMovie(moviesRetrieved.getString(i)));
                 }

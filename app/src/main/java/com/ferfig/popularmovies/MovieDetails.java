@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -68,14 +69,15 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
         if (savedInstanceState == null) {
             Intent receivedIntent = getIntent();
             mMovieDetails = receivedIntent.getParcelableExtra(Utils.MOVIE_DETAILS_OBJECT);
-
-            //Need to get extra data.. Trailers and Reviews
-            getDetailsFromMovieDB();
-            //Also need to check if it's Favorite movie
+Log.w(Utils.APP_TAG, "DetailActivity: onCreate without savedInstanceState");
+            //Check if it's a Favorite movie
             setMovieHasFavorite();
+            //Also, need to get extra data (Trailers and Reviews...)
+            getDetailsFromMovieDB();
         }
         else
         {
+Log.w(Utils.APP_TAG, "DetailActivity: onCreate restored from savedInstanceState");
             mMovieDetails = savedInstanceState.getParcelable(Utils.MOVIE_DETAILS_OBJECT);
         }
         showMovieDetails();
@@ -84,6 +86,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelable(Utils.MOVIE_DETAILS_OBJECT, mMovieDetails);
+Log.w(Utils.APP_TAG, "DetailActivity: onSaveInstanceState");
 
         super.onSaveInstanceState(outState);
     }
@@ -97,10 +100,12 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
 
     private void getDetailsFromMovieDB() {
         if (Utils.isInternetConectionAvailable(this)) {
+Log.w(Utils.APP_TAG, "DetailActivity: retrieving more movie details -> getDetailsFromMovieDB()");
+
             // retrieve movies data with loader
             LoaderManager.LoaderCallbacks<String> callback = MovieDetails.this;
-            getSupportLoaderManager().restartLoader(MOVIE_TRAILERS_LOADER_ID, null, callback);
-            getSupportLoaderManager().restartLoader(MOVIE_REVIEWS_LOADER_ID, null, callback);
+            getSupportLoaderManager().initLoader(MOVIE_TRAILERS_LOADER_ID, null, callback);
+            getSupportLoaderManager().initLoader(MOVIE_REVIEWS_LOADER_ID, null, callback);
         }
         else
         {
@@ -129,7 +134,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
             public String loadInBackground() {
                 try {
                     URL url;
-                    switch (getId()){
+                    switch (this.getId()){
                         case MOVIE_TRAILERS_LOADER_ID:
                             url = UrlUtils.buildUrl(String.format(UrlUtils.MOVIE_TRAILERS_URL, mMovieDetails.getId()));
                             break;
@@ -179,6 +184,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
 
     private void showMovieDetails() {
         if (mMovieDetails!=null) { //should not happen, but...
+Log.w(Utils.APP_TAG, "DetailActivity: showMovieDetails");
             Picasso.with(this).load(
                     mMovieDetails.getDrawablePoster()).into(ivPoster);
             //also set the content description of the movie image/thumbnail to the movie title ;)
@@ -213,6 +219,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
     private void showTrailers() {
         List<Trailer> mTrailerList = mMovieDetails.getTrailers();
         if (mTrailerList != null && mTrailerList.size() > 0) {
+Log.w(Utils.APP_TAG, "DetailActivity: showTrailers with Trailers");
             TrailersRecyclerViewAdapter rvTrailersAdapter = new TrailersRecyclerViewAdapter(getApplicationContext(), mTrailerList,
                     new TrailersRecyclerViewAdapter.OnItemClickListener() {
                         @Override
@@ -241,6 +248,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
             rvTrailers.setVisibility(View.VISIBLE);
         }
         else{
+Log.w(Utils.APP_TAG, "DetailActivity: showTrailers with NO Trailers!");
             //cant make them GONE because of the constraints, else we had to set the related view constraints...
             imTrailersSeparator.setVisibility(View.INVISIBLE);
             tvTrailersLabel.setVisibility(View.INVISIBLE);
@@ -251,6 +259,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
     private void showReviews() {
         List<Review> mReviewsList = mMovieDetails.getReviews();
         if (mReviewsList != null && mReviewsList.size() > 0) {
+Log.w(Utils.APP_TAG, "DetailActivity: showReviews with Reviews");
             ReviewsRecyclerViewAdapter rvReviewsAdapter = new ReviewsRecyclerViewAdapter(this, mReviewsList, null);
 
             rvReviews.setLayoutManager(new LinearLayoutManager(
@@ -265,6 +274,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
             rvReviews.setVisibility(View.VISIBLE);
         }
         else{
+Log.w(Utils.APP_TAG, "DetailActivity: showReviews with NO Reviews!");
             //cant make them GONE because of the constraints, else we had to set the related view constraints...
             imReviewsSeparator.setVisibility(View.GONE);
             tvReviewsLabel.setVisibility(View.GONE);
@@ -310,10 +320,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
         ContentResolver cr = getContentResolver();
         Uri uriInserted = cr.insert(MoviesContract.MoviesEntry.CONTENT_URI, cv);
 
-        if (uriInserted!=null)
-            return true;
-        else
-            return false;
+        return (uriInserted!=null);
     }
 
     private boolean deleteMovieFromLocalDB() {

@@ -13,6 +13,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,7 +30,6 @@ import com.ferfig.popularmovies.utils.Utils;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,39 +39,68 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
 {
     private static final int MOVIEDB_LOADER_ID = 26;
     private static final int LOCALDB_LOADER_ID = 27;
-    private static final String LOCALDB_USED = "LOADERRESULTSSKIP";
 
-    private List<MovieData> mMoviesList;
+    private ArrayList<MovieData> mMoviesList;
+    private String mCurrentSortOrder;
 
     @BindView(R.id.rvMainRecyclerView) RecyclerView mMainRecyclerView;
     @BindView(R.id.pbProgress) ProgressBar mProgressBar;
     @BindView(R.id.tvErrorMessage) TextView mErrorMessage;
 
-    private String mCurrentSortOrder;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
 
+        //get selected movies option and also register for preference change
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         mCurrentSortOrder = sharedPreferences.getString(getString(R.string.pref_sort_by), "0");
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-        getMoviesData();
+        if (savedInstanceState == null) {
+            getNewMoviesData(false);
+Log.w(Utils.APP_TAG, "onCreate with null savedInstanceState");
+        }
+        else{
+            String lastSortOrder = savedInstanceState.getString(Utils.CURRENT_SORT_ORDER);
+            if (mCurrentSortOrder.equals(lastSortOrder)) {
+Log.w(Utils.APP_TAG, "onCreate with savedInstanceState restored");
+                mMoviesList = savedInstanceState.getParcelableArrayList(Utils.ALL_MOVIE_DETAILS_OBJECT);
+
+                showMovieGrid();
+            }
+            else {
+                getNewMoviesData(false);
+Log.w(Utils.APP_TAG, "onCreate with savedInstanceState but different sort option");
+            }
+        }
     }
 
-    private void getDataFromMovieDB() {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(Utils.CURRENT_SORT_ORDER, mCurrentSortOrder);
+        outState.putParcelableArrayList(Utils.ALL_MOVIE_DETAILS_OBJECT, mMoviesList);
+Log.w(Utils.APP_TAG, "savedInstanceState saved");
+        super.onSaveInstanceState(outState);
+    }
+
+    private void getDataFromMovieDB(Boolean fromSharedPrefScreen) {
         hideMovieGrid();
         if (Utils.isInternetConectionAvailable(this)) {
             // retrieve movies data with loader
             LoaderCallbacks<String> callback = MainActivity.this;
             Bundle bundleForLoader = new Bundle();
             bundleForLoader.putString(getString(R.string.pref_sort_by), mCurrentSortOrder);
-
-            getSupportLoaderManager().restartLoader(MOVIEDB_LOADER_ID, bundleForLoader, callback);
+            if (fromSharedPrefScreen) {
+Log.w(Utils.APP_TAG, "getDataFromMovieDB: restartLoader");
+                getSupportLoaderManager().restartLoader(MOVIEDB_LOADER_ID, bundleForLoader, callback);
+            }else{
+Log.w(Utils.APP_TAG, "getDataFromMovieDB: initLoader");
+                getSupportLoaderManager().initLoader(MOVIEDB_LOADER_ID, bundleForLoader, callback);
+            }
         }
         else
         {
@@ -79,10 +108,16 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
         }
     }
 
-    private void getDataFromLocalDB() {
+    private void getDataFromLocalDB(Boolean fromSharedPrefScreen) {
         hideMovieGrid();
         LoaderCallbacks<String> callback = MainActivity.this;
-        getSupportLoaderManager().restartLoader(LOCALDB_LOADER_ID, null, callback);
+        if (fromSharedPrefScreen){
+Log.w(Utils.APP_TAG, "getDataFromLocalDB: restartLoader");
+            getSupportLoaderManager().restartLoader(LOCALDB_LOADER_ID, null, callback);
+        }else {
+Log.w(Utils.APP_TAG, "getDataFromLocalDB: initLoader");
+            getSupportLoaderManager().initLoader(LOCALDB_LOADER_ID, null, callback);
+        }
     }
 
     @Override
@@ -102,18 +137,16 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
             @Override
             protected void onStartLoading() {
                 if (!mMoviesData.equals("")) {
-                    deliverResult(mMoviesData);
+                    this.deliverResult(mMoviesData);
                 } else {
-                    mProgressBar.setVisibility(View.VISIBLE);
-
-                    forceLoad();
+                    this.forceLoad();
                 }
             }
 
             @Override
             public String loadInBackground() {
                 try {
-                    if (getId() == LOCALDB_LOADER_ID){
+                    if (this.getId() == LOCALDB_LOADER_ID){
                         ContentResolver resolver = getContentResolver();
                         Cursor cursor = resolver.query(
                                 MoviesContract.MoviesEntry.CONTENT_URI, null,null,null,null);
@@ -160,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
 
             @Override
             public void deliverResult(String data) {
-                if (getId() == MOVIEDB_LOADER_ID){
+                if (this.getId() == MOVIEDB_LOADER_ID){
                     mMoviesData = data;
                 }
                 super.deliverResult(data);
@@ -170,6 +203,12 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
 
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
+Log.w(Utils.APP_TAG, "onLoadFinished: mProgressBar.setVisibility(View.GONE) - data null? "
+        + Boolean.toString(data==null)
+        + " isAbandoned:" + Boolean.toString(loader.isAbandoned())
+        + " isReset:" + Boolean.toString(loader.isReset())
+        + " isStarted:" + Boolean.toString(loader.isStarted())
+);
         if (null != data) {
             if (loader.getId()==MOVIEDB_LOADER_ID) {
                 mMoviesList = Json.getMoviesList(data);
@@ -189,27 +228,35 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_sort_by))){
+Log.w(Utils.APP_TAG, "onSharedPreferenceChanged...");
             if (!mCurrentSortOrder.equals(sharedPreferences.getString(key, mCurrentSortOrder))){
+Log.w(Utils.APP_TAG, "... retrieving new data");
                 //if it has changed...
                 mCurrentSortOrder = sharedPreferences.getString(key, mCurrentSortOrder);
 
-                getMoviesData();
+                getNewMoviesData(true);
+            }
+            else{
+                Log.w(Utils.APP_TAG, "... no new data retrieving :(");
             }
         }
     }
 
-    private void getMoviesData() {
+    private void getNewMoviesData(Boolean fromSharedPrefScreen) {
         switch (mCurrentSortOrder) {
             case "2":
-                getDataFromLocalDB();
+Log.w(Utils.APP_TAG, "calling getDataFromLocalDB()");
+                getDataFromLocalDB(fromSharedPrefScreen);
                 break;
             default:
-                getDataFromMovieDB();
+Log.w(Utils.APP_TAG, "calling getDataFromMovieDB()");
+                getDataFromMovieDB(fromSharedPrefScreen);
                 break;
         }
     }
 
     private void showMovieGrid() {
+Log.w(Utils.APP_TAG, "showMovieGrid: " );
         mProgressBar.setVisibility(View.GONE);
         mErrorMessage.setVisibility(View.GONE);
         mMainRecyclerView.setVisibility(View.VISIBLE);
@@ -238,12 +285,14 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
     }
 
     private void hideMovieGrid() {
+Log.w(Utils.APP_TAG, "hideMovieGrid: ");
         mProgressBar.setVisibility(View.VISIBLE);
         mErrorMessage.setVisibility(View.GONE);
         mMainRecyclerView.setVisibility(View.GONE);
     }
 
     private void showErrorMessage(int res_error_message) {
+Log.w(Utils.APP_TAG, "showErrorMessage: " );
         /* First, hide the currently visible data */
         mProgressBar.setVisibility(View.GONE);
         mMainRecyclerView.setVisibility(View.GONE);

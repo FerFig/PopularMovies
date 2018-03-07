@@ -10,6 +10,8 @@ import android.view.WindowManager;
 public final class Utils {
     public static final String APP_TAG = "PopMoviesByFF";
     public static final String MOVIE_DETAILS_OBJECT = "MovieDetails";
+    public static final String ALL_MOVIE_DETAILS_OBJECT = "AllMoviesData";
+    public static final String CURRENT_SORT_ORDER = "0";
 
     public static int getDeviceSpanByOrientation(Context context){
         if ((context.getSystemService(Context.WINDOW_SERVICE)) != null) {

@@ -81,27 +81,29 @@ public final class MovieData implements Parcelable {
     }
 
     public String getTrailersInJson() {
-        String treilersJson = "";
+        StringBuilder treilersJson = new StringBuilder();
         for (Trailer trailer:mTrailers) {
-            treilersJson += "{id=" + trailer.getId() +
-                    ",name='" + trailer.getName() + '\'' +
-                    ",provider='" + trailer.getProvider() + '\'' +
-                    ",source='" + trailer.getSource() + '\'' +
-                    ",type='" + trailer.getTrailerType() + '\'' +
-                    ",size=" + trailer.getSize() + '}';
+            treilersJson.append("{id=").append(trailer.getId())
+                    .append(",name='").append(trailer.getName()).append('\'')
+                    .append(",provider='").append(trailer.getProvider()).append('\'')
+                    .append(",source='").append(trailer.getSource()).append('\'')
+                    .append(",type='").append(trailer.getTrailerType()).append('\'')
+                    .append(",size=").append(trailer.getSize())
+                    .append('}');
         }
-        return treilersJson;
+        return treilersJson.toString();
     }
 
     public String getReviewsInJson() {
-        String reviewsJson = "";
+        StringBuilder reviewsJson = new StringBuilder();
         for (Review review:mReviews) {
-            reviewsJson += "{id=" + review.getId() +
-                    ",author='" + review.getAuthor() + '\'' +
-                    ",content='" + review.getContent() + '\'' +
-                    ",url=" + review.getUrl() + '}';
+            reviewsJson.append("{id=").append(review.getId())
+                    .append(",author='").append(review.getAuthor()).append('\'')
+                    .append(",content='").append(review.getContent()).append('\'')
+                    .append(",url=").append(review.getUrl())
+                    .append('}');
         }
-        return reviewsJson;
+        return reviewsJson.toString();
     }
 
     /** getters **/
