@@ -2,12 +2,13 @@ package com.ferfig.popularmovies.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 
 public final class MovieData implements Parcelable {
 
-    private String mId;
+    private long mId;
     private String mTitle;
     private String mReleaseDate;
     private String mPoster;
@@ -20,10 +21,12 @@ public final class MovieData implements Parcelable {
 
     private boolean mFavorite;
 
+    private boolean isRetrievingPoster = false;
+
     private static final String IMAGES_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String POSTER_WSIZE = "w185/";
 
-    public MovieData(String id, String title, String release_date, String poster, String backdrop_image, String vote_average, String synopsis){
+    public MovieData(long id, String title, String release_date, String poster, String backdrop_image, String vote_average, String synopsis){
         this.setId(id);
         this.setTitle(title);
         this.setReleaseDate(release_date);
@@ -35,7 +38,7 @@ public final class MovieData implements Parcelable {
 
     /** Parcelable Stuff **/
     private MovieData(Parcel in) {
-        mId = in.readString();
+        mId = in.readLong();
         mTitle = in.readString();
         mReleaseDate = in.readString();
         mPoster = in.readString();
@@ -51,7 +54,7 @@ public final class MovieData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mId);
+        dest.writeLong(mId);
         dest.writeString(mTitle);
         dest.writeString(mReleaseDate);
         dest.writeString(mPoster);
@@ -81,9 +84,9 @@ public final class MovieData implements Parcelable {
     }
 
     public String getTrailersInJson() {
-        StringBuilder treilersJson = new StringBuilder();
+        StringBuilder trailersJson = new StringBuilder();
         for (Trailer trailer:mTrailers) {
-            treilersJson.append("{id=").append(trailer.getId())
+            trailersJson.append("{id=").append(trailer.getId())
                     .append(",name='").append(trailer.getName()).append('\'')
                     .append(",provider='").append(trailer.getProvider()).append('\'')
                     .append(",source='").append(trailer.getSource()).append('\'')
@@ -91,7 +94,7 @@ public final class MovieData implements Parcelable {
                     .append(",size=").append(trailer.getSize())
                     .append('}');
         }
-        return treilersJson.toString();
+        return trailersJson.toString();
     }
 
     public String getReviewsInJson() {
@@ -107,7 +110,7 @@ public final class MovieData implements Parcelable {
     }
 
     /** getters **/
-    public String getId() {return mId; }
+    public long getId() {return mId; }
 
     public String getTitle() {
         return mTitle;
@@ -117,9 +120,32 @@ public final class MovieData implements Parcelable {
         return mReleaseDate;
     }
 
-    public String getDrawablePoster() {return IMAGES_BASE_URL + POSTER_WSIZE + mPoster; }
+    public String getDrawablePoster() {
+        if (!(mPoster.equals("null"))) {
+            return IMAGES_BASE_URL + POSTER_WSIZE + mPoster;
+        }else{
+            //return backdrop when poster doesn't exist
+            isRetrievingPoster=true;
+            return getDrawableBackDropImage();
+        }
+    }
 
-    public String getDrawableBackDropImage() { return IMAGES_BASE_URL + POSTER_WSIZE + mBackDropImage; }
+    public String getDrawableBackDropImage() {
+        if (!(mBackDropImage.equals("null"))) {
+            return IMAGES_BASE_URL + POSTER_WSIZE + mBackDropImage;
+        }
+        else{
+            if (isRetrievingPoster) {
+                isRetrievingPoster = false;
+                //TODO return dummy poster when both poster and backdrop doesn't exist
+                return IMAGES_BASE_URL + POSTER_WSIZE + mBackDropImage;
+            }
+            else{
+                //TODO return dummy backdrop when backdrop doesn't exist
+                return IMAGES_BASE_URL + POSTER_WSIZE + mBackDropImage;
+            }
+        }
+    }
 
     public String getPoster() {return mPoster; }
 
@@ -140,7 +166,7 @@ public final class MovieData implements Parcelable {
     public boolean isFavorite() { return mFavorite; }
 
     /** setters **/
-    public void setId(String mId) {this.mId = mId; }
+    public void setId(long mId) {this.mId = mId; }
 
     public void setTitle(String mTitle) {
         this.mTitle = mTitle;

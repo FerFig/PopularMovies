@@ -59,7 +59,7 @@ public final class Json {
         try {
             JSONObject jsonMainObject = new JSONObject(json);
 
-            String mId = jsonMainObject.optString(MOVIE_ID);
+            long mId = jsonMainObject.optLong(MOVIE_ID);
             String mTitle = jsonMainObject.optString(MOVIE_TITLE);
             String mReleaseDate = jsonMainObject.optString(MOVIE_RELEASE_DATE);
             String mPoster = jsonMainObject.optString(MOVIE_POSTER);

@@ -1,5 +1,7 @@
 package com.ferfig.popularmovies;
 
+import android.support.v7.app.AppCompatActivity;
+
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +10,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.OrientationHelper;
@@ -40,8 +41,10 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
     private static final int MOVIEDB_LOADER_ID = 26;
     private static final int LOCALDB_LOADER_ID = 27;
 
+    private static final int ID_FOR_ACTIVITY_RESULT = 9;
+
     private ArrayList<MovieData> mMoviesList;
-    private String mCurrentSortOrder;
+    private int mCurrentSortOrder;
 
     @BindView(R.id.rvMainRecyclerView) RecyclerView mMainRecyclerView;
     @BindView(R.id.pbProgress) ProgressBar mProgressBar;
@@ -57,49 +60,53 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
 
         //get selected movies option and also register for preference change
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mCurrentSortOrder = sharedPreferences.getString(getString(R.string.pref_sort_by), "0");
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        mCurrentSortOrder = Integer.valueOf(
+                sharedPreferences.getString(getString(R.string.pref_view_by),
+                String.valueOf(Utils.MODE_POPULAR)));
+
+        setMainScreenTitle();
 
         if (savedInstanceState == null) {
-            getNewMoviesData(false);
+            getNewMoviesData();
 Log.w(Utils.APP_TAG, "onCreate with null savedInstanceState");
         }
         else{
-            String lastSortOrder = savedInstanceState.getString(Utils.CURRENT_SORT_ORDER);
-            if (mCurrentSortOrder.equals(lastSortOrder)) {
+            int lastSortOrder = savedInstanceState.getInt(Utils.CURRENT_VIEW_STATE);
+            if (mCurrentSortOrder==lastSortOrder) {
 Log.w(Utils.APP_TAG, "onCreate with savedInstanceState restored");
-                mMoviesList = savedInstanceState.getParcelableArrayList(Utils.ALL_MOVIE_DETAILS_OBJECT);
+                mMoviesList = savedInstanceState.getParcelableArrayList(Utils.ALL_MOVIES_DATA_OBJECT);
 
                 showMovieGrid();
             }
             else {
-                getNewMoviesData(false);
+                getNewMoviesData();
 Log.w(Utils.APP_TAG, "onCreate with savedInstanceState but different sort option");
             }
         }
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(Utils.CURRENT_SORT_ORDER, mCurrentSortOrder);
-        outState.putParcelableArrayList(Utils.ALL_MOVIE_DETAILS_OBJECT, mMoviesList);
+        outState.putInt(Utils.CURRENT_VIEW_STATE, mCurrentSortOrder);
+        outState.putParcelableArrayList(Utils.ALL_MOVIES_DATA_OBJECT, mMoviesList);
 Log.w(Utils.APP_TAG, "savedInstanceState saved");
         super.onSaveInstanceState(outState);
     }
 
-    private void getDataFromMovieDB(Boolean fromSharedPrefScreen) {
+    private void getDataFromMovieDB() {
         hideMovieGrid();
         if (Utils.isInternetConectionAvailable(this)) {
             // retrieve movies data with loader
             LoaderCallbacks<String> callback = MainActivity.this;
-            Bundle bundleForLoader = new Bundle();
-            bundleForLoader.putString(getString(R.string.pref_sort_by), mCurrentSortOrder);
-            if (fromSharedPrefScreen) {
+            Loader<String> moviesLoaderFromWeb = getSupportLoaderManager().getLoader(MOVIEDB_LOADER_ID);
+            if (moviesLoaderFromWeb != null) {
 Log.w(Utils.APP_TAG, "getDataFromMovieDB: restartLoader");
-                getSupportLoaderManager().restartLoader(MOVIEDB_LOADER_ID, bundleForLoader, callback);
+                getSupportLoaderManager().restartLoader(MOVIEDB_LOADER_ID, null, callback);
             }else{
 Log.w(Utils.APP_TAG, "getDataFromMovieDB: initLoader");
-                getSupportLoaderManager().initLoader(MOVIEDB_LOADER_ID, bundleForLoader, callback);
+                getSupportLoaderManager().initLoader(MOVIEDB_LOADER_ID, null, callback);
             }
         }
         else
@@ -108,10 +115,11 @@ Log.w(Utils.APP_TAG, "getDataFromMovieDB: initLoader");
         }
     }
 
-    private void getDataFromLocalDB(Boolean fromSharedPrefScreen) {
+    private void getDataFromLocalDB() {
         hideMovieGrid();
         LoaderCallbacks<String> callback = MainActivity.this;
-        if (fromSharedPrefScreen){
+        Loader<String> moviesLoaderFromLocalDB = getSupportLoaderManager().getLoader(LOCALDB_LOADER_ID);
+        if (moviesLoaderFromLocalDB!=null){
 Log.w(Utils.APP_TAG, "getDataFromLocalDB: restartLoader");
             getSupportLoaderManager().restartLoader(LOCALDB_LOADER_ID, null, callback);
         }else {
@@ -153,40 +161,40 @@ Log.w(Utils.APP_TAG, "getDataFromLocalDB: initLoader");
                         mMoviesList = new ArrayList<>();
                         if (cursor!=null) {
                             while (cursor.moveToNext()) {
-                                mMoviesList.add(new MovieData(
-                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry._ID)),
-                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TITLE)),
-                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_RELEASE_DATE)),
-                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_POSTER)),
-                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_BACKDROP_IMAGE)),
-                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_VOTE_AVERAGE)),
-                                                cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_SYNOPSIS))
-                                        )
-                                );
+                                MovieData movieData = new MovieData(
+                                        cursor.getLong(cursor.getColumnIndex(MoviesContract.MoviesEntry._ID)),
+                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TITLE)),
+                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_RELEASE_DATE)),
+                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_POSTER)),
+                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_BACKDROP_IMAGE)),
+                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_VOTE_AVERAGE)),
+                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_SYNOPSIS)));
+                                //TODO: movieData.setTrailers(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TRAILERS));
+                                //TODO: movieData.setReviews(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_REVIEWS));
+                                movieData.setFavorite(true);
+                                mMoviesList.add(movieData);
                             }
                             cursor.close();
                         }
                         return "";
                     }
                     else {
-                        String moviesSortedBy = "0"; //default Popular;
-                        if (bundle.containsKey(getString(R.string.pref_sort_by))) {
-                            moviesSortedBy = bundle.getString(getString(R.string.pref_sort_by));
-                            if (moviesSortedBy == null) moviesSortedBy = "0";
-                        }
                         URL url;
-                        switch (moviesSortedBy) {
-                            case "1":
+                        switch (mCurrentSortOrder) {
+                            case Utils.MODE_TOP_RATED:
                                 url = UrlUtils.buildUrl(UrlUtils.TOP_RATED_MOVIES_URL);
                                 break;
-                            default:
+                            default: //Utils.MODE_POPULAR
                                 url = UrlUtils.buildUrl(UrlUtils.POPULAR_MOVIES_URL);
                                 break;
                         }
                         return Network.getResponseFromHttpUrl(url);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    String a="a";
+                    if (a.equals("a")) {
+                        e.printStackTrace();
+                    }
                     return null;
                 }
             }
@@ -217,6 +225,8 @@ Log.w(Utils.APP_TAG, "onLoadFinished: mProgressBar.setVisibility(View.GONE) - da
         } else {
             showErrorMessage(R.string.error_message_text);
         }
+//
+//        getLoaderManager().destroyLoader(loader.getId());
     }
 
     @Override
@@ -227,14 +237,19 @@ Log.w(Utils.APP_TAG, "onLoadFinished: mProgressBar.setVisibility(View.GONE) - da
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.pref_sort_by))){
+        if (key.equals(getString(R.string.pref_view_by))){
 Log.w(Utils.APP_TAG, "onSharedPreferenceChanged...");
-            if (!mCurrentSortOrder.equals(sharedPreferences.getString(key, mCurrentSortOrder))){
-Log.w(Utils.APP_TAG, "... retrieving new data");
+            int currentVal = Integer.valueOf(
+                    sharedPreferences.getString(getString(R.string.pref_view_by),
+                            String.valueOf(Utils.MODE_POPULAR)));
+            if (mCurrentSortOrder != currentVal){
                 //if it has changed...
-                mCurrentSortOrder = sharedPreferences.getString(key, mCurrentSortOrder);
+Log.w(Utils.APP_TAG, "... retrieving new data");
+                mCurrentSortOrder = currentVal;
 
-                getNewMoviesData(true);
+                setMainScreenTitle();
+
+                getNewMoviesData();
             }
             else{
                 Log.w(Utils.APP_TAG, "... no new data retrieving :(");
@@ -242,15 +257,30 @@ Log.w(Utils.APP_TAG, "... retrieving new data");
         }
     }
 
-    private void getNewMoviesData(Boolean fromSharedPrefScreen) {
+    private void setMainScreenTitle() {
+        switch (mCurrentSortOrder){
+            default:
+            case Utils.MODE_POPULAR:
+                setTitle(R.string.app_title_popular);
+                break;
+            case Utils.MODE_TOP_RATED:
+                setTitle(R.string.app_title_top);
+                break;
+            case Utils.MODE_FAVORITES:
+                setTitle(R.string.app_title_favorites);
+                break;
+        }
+    }
+
+    private void getNewMoviesData() {
         switch (mCurrentSortOrder) {
-            case "2":
+            case Utils.MODE_FAVORITES:
 Log.w(Utils.APP_TAG, "calling getDataFromLocalDB()");
-                getDataFromLocalDB(fromSharedPrefScreen);
+                getDataFromLocalDB();
                 break;
             default:
 Log.w(Utils.APP_TAG, "calling getDataFromMovieDB()");
-                getDataFromMovieDB(fromSharedPrefScreen);
+                getDataFromMovieDB();
                 break;
         }
     }
@@ -263,15 +293,15 @@ Log.w(Utils.APP_TAG, "showMovieGrid: " );
 
         int numColumns = Utils.getDeviceSpanByOrientation(this);
 
-        MoviesRecyclerViewAdapter mainMoviesAdapter = new MoviesRecyclerViewAdapter(this, mMoviesList,
+       MoviesRecyclerViewAdapter mainMoviesAdapter = new MoviesRecyclerViewAdapter(this, mMoviesList,
                 new MoviesRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(MovieData movieData) {
                 //prepare the intent to call detail activity
                 Intent movieDetailIntent = new Intent(getApplicationContext(), MovieDetails.class);
                 //And send it to the detail activity
-                movieDetailIntent.putExtra(Utils.MOVIE_DETAILS_OBJECT, movieData);
-                startActivity(movieDetailIntent);
+                movieDetailIntent.putExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT, movieData);
+                startActivityForResult(movieDetailIntent, ID_FOR_ACTIVITY_RESULT);
             }
         });
 
@@ -282,6 +312,30 @@ Log.w(Utils.APP_TAG, "showMovieGrid: " );
                 false));
 
         mMainRecyclerView.setAdapter(mainMoviesAdapter);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == ID_FOR_ACTIVITY_RESULT) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK && mCurrentSortOrder == Utils.MODE_FAVORITES) {
+                //check if movie was removed from favorites and remove it also from the main screen
+                MovieData returnedMovieData = intent.getParcelableExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT);
+                if (!returnedMovieData.isFavorite()) {
+                    for (MovieData movieData : mMoviesList) {
+                        if (movieData.getId() == returnedMovieData.getId()) {
+                            int itemToRemove = mMoviesList.indexOf(movieData);
+                            mMoviesList.remove(itemToRemove);
+                            //MoviesRecyclerViewAdapter mMoviesAdapter = (MoviesRecyclerViewAdapter)mMainRecyclerView.getAdapter();
+                            //mMoviesAdapter.notifyItemRemoved(itemToRemove);
+                            //mMoviesAdapter.notifyItemRangeChanged(itemToRemove, mMoviesList.size());
+                            break;
+                        }
+                    }
+                    showMovieGrid();
+                }
+            }
+        }
     }
 
     private void hideMovieGrid() {

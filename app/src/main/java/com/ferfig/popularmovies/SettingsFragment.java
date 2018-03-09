@@ -46,7 +46,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         }
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

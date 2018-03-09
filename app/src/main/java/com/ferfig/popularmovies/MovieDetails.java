@@ -1,5 +1,6 @@
 package com.ferfig.popularmovies;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -68,7 +69,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
 
         if (savedInstanceState == null) {
             Intent receivedIntent = getIntent();
-            mMovieDetails = receivedIntent.getParcelableExtra(Utils.MOVIE_DETAILS_OBJECT);
+            mMovieDetails = receivedIntent.getParcelableExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT);
 Log.w(Utils.APP_TAG, "DetailActivity: onCreate without savedInstanceState");
             //Check if it's a Favorite movie
             setMovieHasFavorite();
@@ -78,25 +79,18 @@ Log.w(Utils.APP_TAG, "DetailActivity: onCreate without savedInstanceState");
         else
         {
 Log.w(Utils.APP_TAG, "DetailActivity: onCreate restored from savedInstanceState");
-            mMovieDetails = savedInstanceState.getParcelable(Utils.MOVIE_DETAILS_OBJECT);
+            mMovieDetails = savedInstanceState.getParcelable(Utils.SINGLE_MOVIE_DETAILS_OBJECT);
         }
         showMovieDetails();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelable(Utils.MOVIE_DETAILS_OBJECT, mMovieDetails);
+        outState.putParcelable(Utils.SINGLE_MOVIE_DETAILS_OBJECT, mMovieDetails);
 Log.w(Utils.APP_TAG, "DetailActivity: onSaveInstanceState");
 
         super.onSaveInstanceState(outState);
     }
-
-//    @Override
-//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//
-//        mMovieDetails = savedInstanceState.getParcelable(Utils.MOVIE_DETAILS_OBJECT);
-//    }
 
     private void getDetailsFromMovieDB() {
         if (Utils.isInternetConectionAvailable(this)) {
@@ -104,12 +98,28 @@ Log.w(Utils.APP_TAG, "DetailActivity: retrieving more movie details -> getDetail
 
             // retrieve movies data with loader
             LoaderManager.LoaderCallbacks<String> callback = MovieDetails.this;
-            getSupportLoaderManager().initLoader(MOVIE_TRAILERS_LOADER_ID, null, callback);
-            getSupportLoaderManager().initLoader(MOVIE_REVIEWS_LOADER_ID, null, callback);
+
+            LoaderManager loaderManager = getSupportLoaderManager();
+
+            Loader<String> moviesTrailedLoader = loaderManager.getLoader(MOVIE_TRAILERS_LOADER_ID);
+            if (moviesTrailedLoader!=null) {
+                getSupportLoaderManager().restartLoader(MOVIE_TRAILERS_LOADER_ID, null, callback);
+            }
+            else {
+                getSupportLoaderManager().initLoader(MOVIE_TRAILERS_LOADER_ID, null, callback);
+            }
+
+            Loader<String> moviesReviewsLoader = loaderManager.getLoader(MOVIE_REVIEWS_LOADER_ID);
+            if (moviesReviewsLoader!=null) {
+                getSupportLoaderManager().restartLoader(MOVIE_REVIEWS_LOADER_ID, null, callback);
+            }
+            else{
+                getSupportLoaderManager().initLoader(MOVIE_REVIEWS_LOADER_ID, null, callback);
+            }
         }
         else
         {
-            String a="1";//TODO hide trailers view or show error message
+            String a="1";//TODO hide trailers view and show connection required
         }
     }
 
@@ -219,7 +229,6 @@ Log.w(Utils.APP_TAG, "DetailActivity: showMovieDetails");
     private void showTrailers() {
         List<Trailer> mTrailerList = mMovieDetails.getTrailers();
         if (mTrailerList != null && mTrailerList.size() > 0) {
-Log.w(Utils.APP_TAG, "DetailActivity: showTrailers with Trailers");
             TrailersRecyclerViewAdapter rvTrailersAdapter = new TrailersRecyclerViewAdapter(getApplicationContext(), mTrailerList,
                     new TrailersRecyclerViewAdapter.OnItemClickListener() {
                         @Override
@@ -248,7 +257,6 @@ Log.w(Utils.APP_TAG, "DetailActivity: showTrailers with Trailers");
             rvTrailers.setVisibility(View.VISIBLE);
         }
         else{
-Log.w(Utils.APP_TAG, "DetailActivity: showTrailers with NO Trailers!");
             //cant make them GONE because of the constraints, else we had to set the related view constraints...
             imTrailersSeparator.setVisibility(View.INVISIBLE);
             tvTrailersLabel.setVisibility(View.INVISIBLE);
@@ -259,7 +267,6 @@ Log.w(Utils.APP_TAG, "DetailActivity: showTrailers with NO Trailers!");
     private void showReviews() {
         List<Review> mReviewsList = mMovieDetails.getReviews();
         if (mReviewsList != null && mReviewsList.size() > 0) {
-Log.w(Utils.APP_TAG, "DetailActivity: showReviews with Reviews");
             ReviewsRecyclerViewAdapter rvReviewsAdapter = new ReviewsRecyclerViewAdapter(this, mReviewsList, null);
 
             rvReviews.setLayoutManager(new LinearLayoutManager(
@@ -274,7 +281,6 @@ Log.w(Utils.APP_TAG, "DetailActivity: showReviews with Reviews");
             rvReviews.setVisibility(View.VISIBLE);
         }
         else{
-Log.w(Utils.APP_TAG, "DetailActivity: showReviews with NO Reviews!");
             //cant make them GONE because of the constraints, else we had to set the related view constraints...
             imReviewsSeparator.setVisibility(View.GONE);
             tvReviewsLabel.setVisibility(View.GONE);
@@ -325,7 +331,7 @@ Log.w(Utils.APP_TAG, "DetailActivity: showReviews with NO Reviews!");
 
     private boolean deleteMovieFromLocalDB() {
         ContentResolver cr = getContentResolver();
-        long movieId = Long.parseLong(mMovieDetails.getId());
+        long movieId = mMovieDetails.getId();
         Uri movieToDelete = MoviesContract.MoviesEntry.buildMoviesUri(movieId);
         int nDeleted = cr.delete(movieToDelete, null, null);
         return nDeleted>0;
@@ -333,7 +339,7 @@ Log.w(Utils.APP_TAG, "DetailActivity: showReviews with NO Reviews!");
 
     private void setMovieHasFavorite() {
         ContentResolver cr = getContentResolver();
-        long movieId = Long.parseLong(mMovieDetails.getId());
+        long movieId = mMovieDetails.getId();
         Uri movieToGet = MoviesContract.MoviesEntry.buildMoviesUri(movieId);
         Cursor nCursor = cr.query(movieToGet, null, null,null,null);
         if (nCursor != null && nCursor.getCount()>0) {
@@ -347,5 +353,18 @@ Log.w(Utils.APP_TAG, "DetailActivity: showReviews with NO Reviews!");
                     R.mipmap.ic_favorite_off_foreground).into(ivFavorite);
         }
         if (nCursor != null) nCursor.close();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent returnIntent = getIntent();
+        if (!mMovieDetails.isFavorite()) {
+            //we only need to delete movie when is not favorite anymore and the view is displying favorites
+            returnIntent.putExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT, mMovieDetails);
+            setResult(Activity.RESULT_OK, returnIntent);
+        }else{
+            setResult(Activity.RESULT_CANCELED, returnIntent);
+        }
+        super.onBackPressed();
     }
 }

@@ -7,8 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class MoviesDbHelper extends SQLiteOpenHelper{
 
     // DB name & version
-    private static final String DATABASE_NAME = "popmoviesbyff.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final String DATABASE_NAME = "popularmoviesbyff.db";
+    private static final int DATABASE_VERSION = 1;
 
     public MoviesDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -17,7 +17,8 @@ public class MoviesDbHelper extends SQLiteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase db) {
         final String sqlStatment = "CREATE TABLE " +
-                MoviesContract.MoviesEntry.TABLE_MOVIES + "(" + MoviesContract.MoviesEntry._ID + " INTEGER PRIMARY KEY NOT NULL, " +
+                MoviesContract.MoviesEntry.TABLE_MOVIES + "(" +
+                MoviesContract.MoviesEntry._ID + " INTEGER PRIMARY KEY NOT NULL, " +
                 MoviesContract.MoviesEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
                 MoviesContract.MoviesEntry.COLUMN_SYNOPSIS + " TEXT NULL, " +
                 MoviesContract.MoviesEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +

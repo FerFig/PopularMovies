@@ -3,8 +3,8 @@
     <ListPreference
         android:entries="@array/pref_sort_by_options"
         android:entryValues="@array/pref_sort_by_values"
-        android:key="@string/pref_sort_by"
-        android:title="@string/pref_sort_by"
+        android:key="@string/pref_view_by"
+        android:title="@string/pref_view_by"
         android:defaultValue="0"/>
 
 </PreferenceScreen>

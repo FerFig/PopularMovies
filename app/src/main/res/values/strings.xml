@@ -4,17 +4,20 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
-    <string name="pref_sort_by">Sort Movies By</string>
+    <string name="pref_view_by">View Movies By</string>
     <string-array name="pref_sort_by_options">
-        <item>Top Rated</item>
         <item>Popular</item>
+        <item>Top Rated</item>
         <item>Favorites</item>
     </string-array>
     <string-array name="pref_sort_by_values">
-        <item>1</item>
         <item>0</item>
+        <item>1</item>
         <item>2</item>
     </string-array>
+    <string name="app_title_popular">Popular Movies by FF</string>
+    <string name="app_title_top">Top Movies by FF</string>
+    <string name="app_title_favorites">Favorite Movies by FF</string>
 
     <!-- Strings related to Movie Detail activity -->
     <string name="synopsis_label">Synopsis</string>

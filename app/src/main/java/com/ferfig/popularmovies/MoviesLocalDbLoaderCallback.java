@@ -12,8 +12,8 @@ import com.ferfig.popularmovies.model.MoviesContract;
 
 public class MoviesLocalDbLoaderCallback implements LoaderManager.LoaderCallbacks<Cursor>{
 
-    private MainActivity mContext;
-    private SimpleCursorAdapter mAdapter;
+    private final MainActivity mContext;
+    private final SimpleCursorAdapter mAdapter;
 
     private static final String[] PROJECTION = {
             MoviesContract.MoviesEntry._ID,
