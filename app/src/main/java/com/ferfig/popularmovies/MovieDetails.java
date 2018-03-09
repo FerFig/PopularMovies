@@ -267,7 +267,7 @@ Log.w(Utils.APP_TAG, "DetailActivity: showMovieDetails");
     private void showReviews() {
         List<Review> mReviewsList = mMovieDetails.getReviews();
         if (mReviewsList != null && mReviewsList.size() > 0) {
-            ReviewsRecyclerViewAdapter rvReviewsAdapter = new ReviewsRecyclerViewAdapter(this, mReviewsList, null);
+            ReviewsRecyclerViewAdapter rvReviewsAdapter = new ReviewsRecyclerViewAdapter(this, mReviewsList);
 
             rvReviews.setLayoutManager(new LinearLayoutManager(
                     this,
@@ -286,10 +286,6 @@ Log.w(Utils.APP_TAG, "DetailActivity: showMovieDetails");
             tvReviewsLabel.setVisibility(View.GONE);
             rvReviews.setVisibility(View.GONE);
         }
-    }
-
-    private void hideMovieDetails() {
-        //TODO
     }
 
     public void toogleFavorite(View view) {

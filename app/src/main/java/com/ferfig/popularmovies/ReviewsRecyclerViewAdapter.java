@@ -25,10 +25,10 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
     }
     private final OnItemClickListener itemClickListener;
 
-    public ReviewsRecyclerViewAdapter(Context mContext, List<Review> mData, OnItemClickListener listener) {
+    public ReviewsRecyclerViewAdapter(Context mContext, List<Review> mData) {
         this.mContext = mContext;
         this.mData = mData;
-        this.itemClickListener = listener;
+        this.itemClickListener = null;
     }
 
     @Override
