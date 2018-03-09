@@ -1,8 +1,6 @@
 package com.ferfig.popularmovies.utils;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.view.Display;
