@@ -117,10 +117,6 @@ Log.w(Utils.APP_TAG, "DetailActivity: retrieving more movie details -> getDetail
                 getSupportLoaderManager().initLoader(MOVIE_REVIEWS_LOADER_ID, null, callback);
             }
         }
-        else
-        {
-            String a="1";//TODO hide trailers view and show connection required
-        }
     }
 
     @Override
@@ -182,8 +178,6 @@ Log.w(Utils.APP_TAG, "DetailActivity: retrieving more movie details -> getDetail
                     showReviews();
                     break;
             }
-        } else {
-            String b="2"; //TODO showErrorMessage(R.string.error_message_text);
         }
     }
 
@@ -195,8 +189,13 @@ Log.w(Utils.APP_TAG, "DetailActivity: retrieving more movie details -> getDetail
     private void showMovieDetails() {
         if (mMovieDetails!=null) { //should not happen, but...
 Log.w(Utils.APP_TAG, "DetailActivity: showMovieDetails");
-            Picasso.with(this).load(
-                    mMovieDetails.getDrawablePoster()).into(ivPoster);
+            String poster = mMovieDetails.getDrawablePoster();
+            if (poster.equals(MovieData.NO_POSTER)) {
+                Picasso.with(this).load(R.drawable.movie_no_poster).into(ivPoster);
+            }
+            else {
+                Picasso.with(this).load(poster).into(ivPoster);
+            }
             //also set the content description of the movie image/thumbnail to the movie title ;)
             ivPoster.setContentDescription(mMovieDetails.getTitle());
 
@@ -288,7 +287,7 @@ Log.w(Utils.APP_TAG, "DetailActivity: showMovieDetails");
         }
     }
 
-    public void toogleFavorite(View view) {
+    public void toogleFavorite(@SuppressWarnings("unused") View view) {
         if (mMovieDetails.isFavorite()){
             if (deleteMovieFromLocalDB()) {
 //            ivFavorite.setImageResource(R.mipmap.ic_favorite_off_foreground);

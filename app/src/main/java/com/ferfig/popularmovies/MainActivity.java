@@ -169,8 +169,8 @@ Log.w(Utils.APP_TAG, "getDataFromLocalDB: initLoader");
                                         cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_BACKDROP_IMAGE)),
                                         cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_VOTE_AVERAGE)),
                                         cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_SYNOPSIS)));
-                                //TODO: movieData.setTrailers(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TRAILERS));
-                                //TODO: movieData.setReviews(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_REVIEWS));
+                                //TO DO: movieData.setTrailers(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TRAILERS));
+                                //TO DO: movieData.setReviews(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_REVIEWS));
                                 movieData.setFavorite(true);
                                 mMoviesList.add(movieData);
                             }

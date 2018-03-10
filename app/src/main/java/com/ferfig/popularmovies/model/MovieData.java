@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 public final class MovieData implements Parcelable {
 
+    public static final String NO_POSTER = "NO_POSTER";
     private long mId;
     private String mTitle;
     private String mReleaseDate;
@@ -19,8 +20,6 @@ public final class MovieData implements Parcelable {
     private ArrayList<Review> mReviews;
 
     private boolean mFavorite;
-
-    private boolean isRetrievingPoster = false;
 
     private static final String IMAGES_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String POSTER_WSIZE = "w185/";
@@ -124,7 +123,6 @@ public final class MovieData implements Parcelable {
             return IMAGES_BASE_URL + POSTER_WSIZE + mPoster;
         }else{
             //return backdrop when poster doesn't exist
-            isRetrievingPoster=true;
             return getDrawableBackDropImage();
         }
     }
@@ -134,15 +132,8 @@ public final class MovieData implements Parcelable {
             return IMAGES_BASE_URL + POSTER_WSIZE + mBackDropImage;
         }
         else{
-            if (isRetrievingPoster) {
-                isRetrievingPoster = false;
-                //TODO return dummy poster when both poster and backdrop doesn't exist
-                return IMAGES_BASE_URL + POSTER_WSIZE + mBackDropImage;
-            }
-            else{
-                //TODO return dummy backdrop when backdrop doesn't exist
-                return IMAGES_BASE_URL + POSTER_WSIZE + mBackDropImage;
-            }
+            //if backdrop also didn't exist return the "no poster image" :)
+            return NO_POSTER;
         }
     }
 
