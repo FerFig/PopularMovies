@@ -1,6 +1,7 @@
 package com.ferfig.popularmovies;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,15 +32,16 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
         this.itemClickListener = null;
     }
 
+    @NonNull
     @Override
-    public ReviewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ReviewViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater mInftr = LayoutInflater.from(mContext);
         View view = mInftr.inflate(R.layout.review, parent, false);
         return new ReviewViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ReviewViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull ReviewViewHolder holder, final int position) {
         holder.bind(mData.get(position), itemClickListener);
     }
 

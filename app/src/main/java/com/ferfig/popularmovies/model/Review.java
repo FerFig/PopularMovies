@@ -10,7 +10,7 @@ public class Review  implements Parcelable {
     private String mContent;
     private String mUrl;
 
-    protected Review(Parcel in) {
+    private Review(Parcel in) {
         mId = in.readString();
         mAuthor = in.readString();
         mContent = in.readString();
@@ -25,7 +25,7 @@ public class Review  implements Parcelable {
         dest.writeString(mUrl);
     }
 
-    public static final Creator<Review> CREATOR = new Creator<Review>() {
+    static final Creator<Review> CREATOR = new Creator<Review>() {
         @Override
         public Review createFromParcel(Parcel in) { return new Review(in); }
 
@@ -47,6 +47,7 @@ public class Review  implements Parcelable {
         return mId;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setId(String mId) {
         this.mId = mId;
     }
@@ -55,6 +56,7 @@ public class Review  implements Parcelable {
         return mAuthor;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setAuthor(String mAuthor) {
         this.mAuthor = mAuthor;
     }
@@ -63,14 +65,17 @@ public class Review  implements Parcelable {
         return mContent;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setContent(String mContent) {
         this.mContent = mContent;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public String getUrl() {
         return mUrl;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setUrl(String mUrl) {
         this.mUrl = mUrl;
     }

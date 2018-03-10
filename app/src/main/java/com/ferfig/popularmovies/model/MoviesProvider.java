@@ -4,6 +4,7 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
@@ -112,10 +113,7 @@ public class MoviesProvider extends ContentProvider {
 
             }
         }
-        ContentResolver cr = getContext().getContentResolver();
-        if (cr != null) {
-            cr.notifyChange(uri, null);
-        }
+        notifyChanges(uri);
         return returnUri;
     }
 
@@ -138,12 +136,19 @@ public class MoviesProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         if (numDel > 0){
-            ContentResolver cr = getContext().getContentResolver();
+            notifyChanges(uri);
+        }
+        return numDel;
+    }
+
+    private void notifyChanges(@NonNull Uri uri) {
+        Context ctx = getContext();
+        if (ctx!=null) {
+            ContentResolver cr = ctx.getContentResolver();
             if (cr != null) {
                 cr.notifyChange(uri, null);
             }
         }
-        return numDel;
     }
 
     @Override
@@ -176,10 +181,7 @@ public class MoviesProvider extends ContentProvider {
         }
 
         if (numUpd > 0){
-            ContentResolver cr = getContext().getContentResolver();
-            if (cr != null) {
-                cr.notifyChange(uri, null);
-            }
+            notifyChanges(uri);
         }
 
         return numUpd;
@@ -218,10 +220,7 @@ public class MoviesProvider extends ContentProvider {
                     db.endTransaction();
                 }
                 if (numIns > 0){
-                    ContentResolver cr = getContext().getContentResolver();
-                    if (cr!=null) {
-                        cr.notifyChange(uri, null);
-                    }
+                    notifyChanges(uri);
                 }
                 return numIns;
             default:

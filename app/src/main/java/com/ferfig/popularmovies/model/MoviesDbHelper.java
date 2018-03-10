@@ -4,13 +4,13 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class MoviesDbHelper extends SQLiteOpenHelper{
+class MoviesDbHelper extends SQLiteOpenHelper{
 
     // DB name & version
     private static final String DATABASE_NAME = "popularmoviesbyff.db";
     private static final int DATABASE_VERSION = 1;
 
-    public MoviesDbHelper(Context context) {
+    MoviesDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

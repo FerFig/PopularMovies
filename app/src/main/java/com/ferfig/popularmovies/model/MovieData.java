@@ -127,6 +127,7 @@ public final class MovieData implements Parcelable {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     public String getDrawableBackDropImage() {
         if (!(mBackDropImage.equals("null"))) {
             return IMAGES_BASE_URL + POSTER_WSIZE + mBackDropImage;
@@ -156,24 +157,31 @@ public final class MovieData implements Parcelable {
     public boolean isFavorite() { return mFavorite; }
 
     /** setters **/
+    @SuppressWarnings("WeakerAccess")
     public void setId(long mId) {this.mId = mId; }
 
+    @SuppressWarnings("WeakerAccess")
     public void setTitle(String mTitle) {
         this.mTitle = mTitle;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setReleaseDate(String mReleaseDate) {
         this.mReleaseDate = mReleaseDate;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setPoster(String mPoster) { this.mPoster = mPoster; }
 
+    @SuppressWarnings("WeakerAccess")
     public void setBackDropImage(String mBackDropImage) { this.mBackDropImage = mBackDropImage; }
 
+    @SuppressWarnings("WeakerAccess")
     public void setVoteAverage(String mVoteAverage) {
         this.mVoteAverage = mVoteAverage;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setSynopsis(String mSynopsis) {
         this.mSynopsis = mSynopsis;
     }
