@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -45,19 +47,30 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
 
     private MovieData mMovieDetails;
 
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.ivPoster) ImageView ivPoster;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.tvTitle) TextView tvTitle;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.tvAvgRate) TextView tvAvgRate;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.tvRelDate) TextView tvRelDate;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.tvSynopsis) TextView tvSynopsis;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.ivFavorite) ImageView ivFavorite;
 
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.tvTrailersLabel) TextView tvTrailersLabel;
-    @BindView(R.id.imSynopsisSeparator) ImageView imSynopsisSeparator;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.rvTrailers) RecyclerView rvTrailers;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.imTrailersSeparator) ImageView imTrailersSeparator;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.tvReviewsLabel) TextView tvReviewsLabel;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.imReviewsSeparator) ImageView imReviewsSeparator;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.rvReviews) RecyclerView rvReviews;
 
     @Override
@@ -99,74 +112,85 @@ Log.w(Utils.APP_TAG, "DetailActivity: retrieving more movie details -> getDetail
             // retrieve movies data with loader
             LoaderManager.LoaderCallbacks<String> callback = MovieDetails.this;
 
+            Bundle bundleForLoader = new Bundle();
+            bundleForLoader.putLong(Utils.MOVIE_ID, mMovieDetails.getId());
+
             LoaderManager loaderManager = getSupportLoaderManager();
 
             Loader<String> moviesTrailedLoader = loaderManager.getLoader(MOVIE_TRAILERS_LOADER_ID);
             if (moviesTrailedLoader!=null) {
-                getSupportLoaderManager().restartLoader(MOVIE_TRAILERS_LOADER_ID, null, callback);
+                getSupportLoaderManager().restartLoader(MOVIE_TRAILERS_LOADER_ID, bundleForLoader, callback);
             }
             else {
-                getSupportLoaderManager().initLoader(MOVIE_TRAILERS_LOADER_ID, null, callback);
+                getSupportLoaderManager().initLoader(MOVIE_TRAILERS_LOADER_ID, bundleForLoader, callback);
             }
 
             Loader<String> moviesReviewsLoader = loaderManager.getLoader(MOVIE_REVIEWS_LOADER_ID);
             if (moviesReviewsLoader!=null) {
-                getSupportLoaderManager().restartLoader(MOVIE_REVIEWS_LOADER_ID, null, callback);
+                getSupportLoaderManager().restartLoader(MOVIE_REVIEWS_LOADER_ID, bundleForLoader, callback);
             }
             else{
-                getSupportLoaderManager().initLoader(MOVIE_REVIEWS_LOADER_ID, null, callback);
+                getSupportLoaderManager().initLoader(MOVIE_REVIEWS_LOADER_ID, bundleForLoader, callback);
             }
         }
     }
 
+    @NonNull
     @Override
-    public Loader<String> onCreateLoader(int id, Bundle args) {
-        return new AsyncTaskLoader<String>(this) {
+    public Loader<String> onCreateLoader(int id, Bundle bundle) {
+        return new MovieDetailsAsyncLoader(this, bundle);
+    }
 
-            String mResponseData = "";
+    private static class MovieDetailsAsyncLoader extends AsyncTaskLoader<String> {
 
-            @Override
-            protected void onStartLoading() {
-                if (!mResponseData.equals("")) {
-                    deliverResult(mResponseData);
-                } else {
-                    //mProgressBar.setVisibility(View.VISIBLE);
+        private final long mMovieId;
+        String mResponseData;
 
-                    forceLoad();
+        MovieDetailsAsyncLoader(@NonNull Context context, Bundle bundle) {
+            super(context);
+            mResponseData="";
+            mMovieId = bundle.getLong(Utils.MOVIE_ID);
+        }
+
+        @Override
+        protected void onStartLoading() {
+            if (!mResponseData.isEmpty()) {
+                deliverResult(mResponseData);
+            } else {
+                forceLoad();
+            }
+        }
+
+        @Override
+        public String loadInBackground() {
+            try {
+                URL url;
+                switch (this.getId()) {
+                    case MOVIE_TRAILERS_LOADER_ID:
+                        url = UrlUtils.buildUrl(String.format(UrlUtils.MOVIE_TRAILERS_URL, mMovieId));
+                        break;
+                    case MOVIE_REVIEWS_LOADER_ID:
+                        url = UrlUtils.buildUrl(String.format(UrlUtils.MOVIE_REVIEWS_URL, mMovieId));
+                        break;
+                    default:
+                        throw new java.lang.UnsupportedOperationException();
                 }
+                return Network.getResponseFromHttpUrl(url);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
             }
+        }
 
-            @Override
-            public String loadInBackground() {
-                try {
-                    URL url;
-                    switch (this.getId()){
-                        case MOVIE_TRAILERS_LOADER_ID:
-                            url = UrlUtils.buildUrl(String.format(UrlUtils.MOVIE_TRAILERS_URL, mMovieDetails.getId()));
-                            break;
-                        case MOVIE_REVIEWS_LOADER_ID:
-                            url = UrlUtils.buildUrl(String.format(UrlUtils.MOVIE_REVIEWS_URL, mMovieDetails.getId()));
-                            break;
-                        default:
-                            throw new java.lang.UnsupportedOperationException();
-                    }
-                    return Network.getResponseFromHttpUrl(url);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-
-            @Override
-            public void deliverResult(String data) {
-                mResponseData = data;
-                super.deliverResult(data);
-            }
-        };
+        @Override
+        public void deliverResult(String data) {
+            mResponseData = data;
+            super.deliverResult(data);
+        }
     }
 
     @Override
-    public void onLoadFinished(Loader<String> loader, String data) {
+    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
         if (null != data) {
             switch (loader.getId()) {
                 case MOVIE_TRAILERS_LOADER_ID:
@@ -182,7 +206,7 @@ Log.w(Utils.APP_TAG, "DetailActivity: retrieving more movie details -> getDetail
     }
 
     @Override
-    public void onLoaderReset(Loader<String> loader) {
+    public void onLoaderReset(@NonNull Loader<String> loader) {
 
     }
 

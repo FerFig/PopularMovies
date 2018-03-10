@@ -1,5 +1,8 @@
 package com.ferfig.popularmovies;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import android.content.ContentResolver;
@@ -35,19 +38,19 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements LoaderCallbacks<String>,
+public class MainActivity extends AppCompatActivity implements LoaderCallbacks<ArrayList<MovieData>>,
         SharedPreferences.OnSharedPreferenceChangeListener
 {
-    private static final int MOVIEDB_LOADER_ID = 26;
-    private static final int LOCALDB_LOADER_ID = 27;
-
     private static final int ID_FOR_ACTIVITY_RESULT = 9;
 
     private ArrayList<MovieData> mMoviesList;
     private int mCurrentSortOrder;
 
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.rvMainRecyclerView) RecyclerView mMainRecyclerView;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.pbProgress) ProgressBar mProgressBar;
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.tvErrorMessage) TextView mErrorMessage;
 
     @Override
@@ -68,19 +71,19 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<S
 
         if (savedInstanceState == null) {
             getNewMoviesData();
-Log.w(Utils.APP_TAG, "onCreate with null savedInstanceState");
+Log.w(Utils.APP_TAG, "MainActivity: onCreate with null savedInstanceState");
         }
         else{
             int lastSortOrder = savedInstanceState.getInt(Utils.CURRENT_VIEW_STATE);
             if (mCurrentSortOrder==lastSortOrder) {
-Log.w(Utils.APP_TAG, "onCreate with savedInstanceState restored");
+Log.w(Utils.APP_TAG, "MainActivity: onCreate with savedInstanceState restored");
                 mMoviesList = savedInstanceState.getParcelableArrayList(Utils.ALL_MOVIES_DATA_OBJECT);
 
                 showMovieGrid();
             }
             else {
                 getNewMoviesData();
-Log.w(Utils.APP_TAG, "onCreate with savedInstanceState but different sort option");
+Log.w(Utils.APP_TAG, "MainActivity: onCreate with savedInstanceState but different sort option");
             }
         }
 
@@ -91,7 +94,7 @@ Log.w(Utils.APP_TAG, "onCreate with savedInstanceState but different sort option
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(Utils.CURRENT_VIEW_STATE, mCurrentSortOrder);
         outState.putParcelableArrayList(Utils.ALL_MOVIES_DATA_OBJECT, mMoviesList);
-Log.w(Utils.APP_TAG, "savedInstanceState saved");
+Log.w(Utils.APP_TAG, "MainActivity: savedInstanceState saved");
         super.onSaveInstanceState(outState);
     }
 
@@ -99,14 +102,18 @@ Log.w(Utils.APP_TAG, "savedInstanceState saved");
         hideMovieGrid();
         if (Utils.isInternetConectionAvailable(this)) {
             // retrieve movies data with loader
-            LoaderCallbacks<String> callback = MainActivity.this;
-            Loader<String> moviesLoaderFromWeb = getSupportLoaderManager().getLoader(MOVIEDB_LOADER_ID);
+            LoaderCallbacks<ArrayList<MovieData>> callback = MainActivity.this;
+
+            Bundle bundleForLoader = new Bundle();
+            bundleForLoader.putInt(Utils.CURRENT_VIEW_STATE, mCurrentSortOrder);
+
+            Loader<String> moviesLoaderFromWeb = getSupportLoaderManager().getLoader(MoviesAsyncLoader.MOVIEDB_LOADER_ID);
             if (moviesLoaderFromWeb != null) {
-Log.w(Utils.APP_TAG, "getDataFromMovieDB: restartLoader");
-                getSupportLoaderManager().restartLoader(MOVIEDB_LOADER_ID, null, callback);
+Log.w(Utils.APP_TAG, "MainActivity: getDataFromMovieDB: restartLoader");
+                getSupportLoaderManager().restartLoader(MoviesAsyncLoader.MOVIEDB_LOADER_ID, bundleForLoader, callback);
             }else{
-Log.w(Utils.APP_TAG, "getDataFromMovieDB: initLoader");
-                getSupportLoaderManager().initLoader(MOVIEDB_LOADER_ID, null, callback);
+Log.w(Utils.APP_TAG, "MainActivity: getDataFromMovieDB: initLoader");
+                getSupportLoaderManager().initLoader(MoviesAsyncLoader.MOVIEDB_LOADER_ID, bundleForLoader, callback);
             }
         }
         else
@@ -117,14 +124,18 @@ Log.w(Utils.APP_TAG, "getDataFromMovieDB: initLoader");
 
     private void getDataFromLocalDB() {
         hideMovieGrid();
-        LoaderCallbacks<String> callback = MainActivity.this;
-        Loader<String> moviesLoaderFromLocalDB = getSupportLoaderManager().getLoader(LOCALDB_LOADER_ID);
+        LoaderCallbacks<ArrayList<MovieData>> callback = MainActivity.this;
+
+        Bundle bundleForLoader = new Bundle();
+        bundleForLoader.putInt(Utils.CURRENT_VIEW_STATE, mCurrentSortOrder);
+
+        Loader<String> moviesLoaderFromLocalDB = getSupportLoaderManager().getLoader(MoviesAsyncLoader.LOCALDB_LOADER_ID);
         if (moviesLoaderFromLocalDB!=null){
-Log.w(Utils.APP_TAG, "getDataFromLocalDB: restartLoader");
-            getSupportLoaderManager().restartLoader(LOCALDB_LOADER_ID, null, callback);
+Log.w(Utils.APP_TAG, "MainActivity: getDataFromLocalDB: restartLoader");
+            getSupportLoaderManager().restartLoader(MoviesAsyncLoader.LOCALDB_LOADER_ID, bundleForLoader, callback);
         }else {
-Log.w(Utils.APP_TAG, "getDataFromLocalDB: initLoader");
-            getSupportLoaderManager().initLoader(LOCALDB_LOADER_ID, null, callback);
+Log.w(Utils.APP_TAG, "MainActivity: getDataFromLocalDB: initLoader");
+            getSupportLoaderManager().initLoader(MoviesAsyncLoader.LOCALDB_LOADER_ID, bundleForLoader, callback);
         }
     }
 
@@ -136,91 +147,107 @@ Log.w(Utils.APP_TAG, "getDataFromLocalDB: initLoader");
     }
 
     /* BEGIN LoaderCallbacks Methods */
+    @NonNull
     @Override
-    public Loader<String> onCreateLoader(int id, final Bundle bundle) {
-        return new AsyncTaskLoader<String>(this) {
+    public Loader<ArrayList<MovieData>> onCreateLoader(int id, @Nullable final Bundle bundle) {
+        return new MoviesAsyncLoader(this, bundle, getContentResolver());
+    }
 
-            String mMoviesData = "";
+    private static class MoviesAsyncLoader extends AsyncTaskLoader<ArrayList<MovieData>> {
+        static final int MOVIEDB_LOADER_ID = 26;
+        static final int LOCALDB_LOADER_ID = 27;
 
-            @Override
-            protected void onStartLoading() {
-                if (!mMoviesData.equals("")) {
-                    this.deliverResult(mMoviesData);
+        private final int mAsyncSortOrder;
+        private final ContentResolver mContentResolver;
+
+        private ArrayList<MovieData> mAsyncMoviesList;
+
+        MoviesAsyncLoader(Context context, Bundle bundle, ContentResolver contentResolver) {
+            super(context);
+            mContentResolver = contentResolver;
+            mAsyncSortOrder = bundle.getInt(Utils.CURRENT_VIEW_STATE);
+        }
+
+        @Override
+        protected void onStartLoading() {
+            if (mAsyncMoviesList != null && mAsyncMoviesList.size()>0) {
+                this.deliverResult(mAsyncMoviesList);
+            } else {
+                this.forceLoad();
+            }
+        }
+
+        @Override
+        public ArrayList<MovieData> loadInBackground() {
+            try {
+                if (this.getId() == LOCALDB_LOADER_ID) {
+                    Cursor cursor = mContentResolver.query(
+                            MoviesContract.MoviesEntry.CONTENT_URI, null, null, null, null);
+                    mAsyncMoviesList = new ArrayList<>();
+                    if (cursor != null) {
+                        while (cursor.moveToNext()) {
+                            MovieData movieData = new MovieData(
+                                    cursor.getLong(cursor.getColumnIndex(MoviesContract.MoviesEntry._ID)),
+                                    cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TITLE)),
+                                    cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_RELEASE_DATE)),
+                                    cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_POSTER)),
+                                    cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_BACKDROP_IMAGE)),
+                                    cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_VOTE_AVERAGE)),
+                                    cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_SYNOPSIS)));
+                            //TO_DO: movieData.setTrailers(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TRAILERS));
+                            //TO_DO: movieData.setReviews(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_REVIEWS));
+                            movieData.setFavorite(true);
+                            mAsyncMoviesList.add(movieData);
+                        }
+                        cursor.close();
+                    }
+                    return mAsyncMoviesList;
                 } else {
-                    this.forceLoad();
+                    URL url;
+                    switch (mAsyncSortOrder) {
+                        case Utils.MODE_TOP_RATED:
+                            url = UrlUtils.buildUrl(UrlUtils.TOP_RATED_MOVIES_URL);
+                            break;
+                        default: //Utils.MODE_POPULAR
+                            url = UrlUtils.buildUrl(UrlUtils.POPULAR_MOVIES_URL);
+                            break;
+                    }
+                    String mMoviesData = Network.getResponseFromHttpUrl(url);
+                    if (!mMoviesData.isEmpty()){
+                        mAsyncMoviesList = Json.getMoviesList(mMoviesData);
+                    }
+                    else{ //return empty movies list :(
+                        mAsyncMoviesList = new ArrayList<>();
+                    }
+                    return mAsyncMoviesList;
                 }
+            } catch (Exception e) {
+                String a = "a";
+                if (a.equals("a")) {
+                    e.printStackTrace();
+                }
+                return null;
             }
+        }
 
-            @Override
-            public String loadInBackground() {
-                try {
-                    if (this.getId() == LOCALDB_LOADER_ID){
-                        ContentResolver resolver = getContentResolver();
-                        Cursor cursor = resolver.query(
-                                MoviesContract.MoviesEntry.CONTENT_URI, null,null,null,null);
-                        mMoviesList = new ArrayList<>();
-                        if (cursor!=null) {
-                            while (cursor.moveToNext()) {
-                                MovieData movieData = new MovieData(
-                                        cursor.getLong(cursor.getColumnIndex(MoviesContract.MoviesEntry._ID)),
-                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TITLE)),
-                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_RELEASE_DATE)),
-                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_POSTER)),
-                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_BACKDROP_IMAGE)),
-                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_VOTE_AVERAGE)),
-                                        cursor.getString(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_SYNOPSIS)));
-                                //TO DO: movieData.setTrailers(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_TRAILERS));
-                                //TO DO: movieData.setReviews(cursor.getColumnIndex(MoviesContract.MoviesEntry.COLUMN_REVIEWS));
-                                movieData.setFavorite(true);
-                                mMoviesList.add(movieData);
-                            }
-                            cursor.close();
-                        }
-                        return "";
-                    }
-                    else {
-                        URL url;
-                        switch (mCurrentSortOrder) {
-                            case Utils.MODE_TOP_RATED:
-                                url = UrlUtils.buildUrl(UrlUtils.TOP_RATED_MOVIES_URL);
-                                break;
-                            default: //Utils.MODE_POPULAR
-                                url = UrlUtils.buildUrl(UrlUtils.POPULAR_MOVIES_URL);
-                                break;
-                        }
-                        return Network.getResponseFromHttpUrl(url);
-                    }
-                } catch (Exception e) {
-                    String a="a";
-                    if (a.equals("a")) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-            }
+        @Override
+        public void deliverResult(ArrayList<MovieData> data) {
 
-            @Override
-            public void deliverResult(String data) {
-                if (this.getId() == MOVIEDB_LOADER_ID){
-                    mMoviesData = data;
-                }
-                super.deliverResult(data);
-            }
-        };
+            super.deliverResult(data);
+        }
     }
 
     @Override
-    public void onLoadFinished(Loader<String> loader, String data) {
-Log.w(Utils.APP_TAG, "onLoadFinished: mProgressBar.setVisibility(View.GONE) - data null? "
+    public void onLoadFinished(@NonNull Loader<ArrayList<MovieData>> loader, ArrayList<MovieData> data) {
+Log.w(Utils.APP_TAG, "MainActivity: onLoadFinished: mProgressBar.setVisibility(View.GONE) - data null? "
         + Boolean.toString(data==null)
         + " isAbandoned:" + Boolean.toString(loader.isAbandoned())
         + " isReset:" + Boolean.toString(loader.isReset())
         + " isStarted:" + Boolean.toString(loader.isStarted())
 );
         if (null != data) {
-            if (loader.getId()==MOVIEDB_LOADER_ID) {
-                mMoviesList = Json.getMoviesList(data);
-            }
+            mMoviesList = data;
+
             showMovieGrid();
         } else {
             showErrorMessage(R.string.error_message_text);
@@ -230,7 +257,7 @@ Log.w(Utils.APP_TAG, "onLoadFinished: mProgressBar.setVisibility(View.GONE) - da
     }
 
     @Override
-    public void onLoaderReset(Loader<String> loader) {
+    public void onLoaderReset(@NonNull Loader<ArrayList<MovieData>> loader) {
 
     }
     /* END LoaderCallbacks Methods */
@@ -238,13 +265,13 @@ Log.w(Utils.APP_TAG, "onLoadFinished: mProgressBar.setVisibility(View.GONE) - da
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_view_by))){
-Log.w(Utils.APP_TAG, "onSharedPreferenceChanged...");
+Log.w(Utils.APP_TAG, "MainActivity: onSharedPreferenceChanged...");
             int currentVal = Integer.valueOf(
                     sharedPreferences.getString(getString(R.string.pref_view_by),
                             String.valueOf(Utils.MODE_POPULAR)));
             if (mCurrentSortOrder != currentVal){
                 //if it has changed...
-Log.w(Utils.APP_TAG, "... retrieving new data");
+Log.w(Utils.APP_TAG, "MainActivity: ... retrieving new data");
                 mCurrentSortOrder = currentVal;
 
                 setMainScreenTitle();
@@ -252,7 +279,7 @@ Log.w(Utils.APP_TAG, "... retrieving new data");
                 getNewMoviesData();
             }
             else{
-                Log.w(Utils.APP_TAG, "... no new data retrieving :(");
+                Log.w(Utils.APP_TAG, "MainActivity: ... no new data retrieving :(");
             }
         }
     }
@@ -275,18 +302,18 @@ Log.w(Utils.APP_TAG, "... retrieving new data");
     private void getNewMoviesData() {
         switch (mCurrentSortOrder) {
             case Utils.MODE_FAVORITES:
-Log.w(Utils.APP_TAG, "calling getDataFromLocalDB()");
+Log.w(Utils.APP_TAG, "MainActivity: calling getDataFromLocalDB()");
                 getDataFromLocalDB();
                 break;
             default:
-Log.w(Utils.APP_TAG, "calling getDataFromMovieDB()");
+Log.w(Utils.APP_TAG, "MainActivity: calling getDataFromMovieDB()");
                 getDataFromMovieDB();
                 break;
         }
     }
 
     private void showMovieGrid() {
-Log.w(Utils.APP_TAG, "showMovieGrid: " );
+Log.w(Utils.APP_TAG, "MainActivity: showMovieGrid: " );
         mProgressBar.setVisibility(View.GONE);
         mErrorMessage.setVisibility(View.GONE);
         mMainRecyclerView.setVisibility(View.VISIBLE);
@@ -339,14 +366,14 @@ Log.w(Utils.APP_TAG, "showMovieGrid: " );
     }
 
     private void hideMovieGrid() {
-Log.w(Utils.APP_TAG, "hideMovieGrid: ");
+Log.w(Utils.APP_TAG, "MainActivity: hideMovieGrid: ");
         mProgressBar.setVisibility(View.VISIBLE);
         mErrorMessage.setVisibility(View.GONE);
         mMainRecyclerView.setVisibility(View.GONE);
     }
 
     private void showErrorMessage(int res_error_message) {
-Log.w(Utils.APP_TAG, "showErrorMessage: " );
+Log.w(Utils.APP_TAG, "MainActivity: showErrorMessage: " );
         /* First, hide the currently visible data */
         mProgressBar.setVisibility(View.GONE);
         mMainRecyclerView.setVisibility(View.GONE);
