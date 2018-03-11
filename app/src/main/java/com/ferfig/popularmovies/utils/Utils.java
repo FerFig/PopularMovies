@@ -11,7 +11,7 @@ public final class Utils {
     public static final String APP_TAG = "PopMoviesByFF";
     public static final String SINGLE_MOVIE_DETAILS_OBJECT = "MovieDetails";
     public static final String ALL_MOVIES_DATA_OBJECT = "AllMoviesData";
-    public static final String CURRENT_VIEW_STATE = "com.ferfig.popularmovies.CURRENT_TYPE";
+    public static final String CURRENT_VIEW_TYPE = "com.ferfig.popularmovies.CURRENT_TYPE";
     public static final String MOVIE_ID = "com.ferfig.popularmovies.MOVIE_ID";
     public static final int MODE_POPULAR = 0;
     public static final int MODE_TOP_RATED = 1;
