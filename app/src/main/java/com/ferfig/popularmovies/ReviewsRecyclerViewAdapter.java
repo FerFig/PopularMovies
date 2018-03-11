@@ -51,8 +51,9 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
         return mData.size();
     }
 
-    public class ReviewViewHolder extends RecyclerView.ViewHolder{
+    public class ReviewViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.tvReviewerLabel) TextView tvReviewerLabel;
         @BindView(R.id.tvReviewer) TextView tvReviewer;
         @BindView(R.id.tvReview) TextView tvReview;
         @BindView(R.id.imReviewsSeparator) ImageView imReviewsSeparator;
@@ -65,20 +66,25 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
 
         public void bind(final Review reviewData, final OnItemClickListener listener) {
             tvReviewer.setText(reviewData.getAuthor());
-            tvReview.setText(reviewData.getContent());
-            if (getAdapterPosition() == mData.size()-1) {//last one is not needed to have separator ;)
+            if (getAdapterPosition() == mData.size() - 1) {//last one is not needed to have separator ;)
                 imReviewsSeparator.setVisibility(View.INVISIBLE);
             }
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    if (listener!=null) {
-                        listener.onItemClick(reviewData);
+            if (reviewData.getId().equals(Review.DUMMY_REVIEW_ID)) {
+                tvReviewerLabel.setVisibility(View.GONE);
+                tvReviewer.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
+                tvReviewer.setPadding(10,40,10,50);
+                tvReview.setVisibility(View.GONE);
+            } else {
+                tvReview.setText(reviewData.getContent());
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (listener != null) {
+                            listener.onItemClick(reviewData);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
-
     }
-
 }

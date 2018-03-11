@@ -5,6 +5,17 @@ import android.os.Parcelable;
 
 public class Trailer implements Parcelable{
 
+    public static final String TRAILER_ID = "id";
+    public static final String TRAILER_PROVIDER = "site";
+    public static final String TRAILER_NAME = "name";
+    public static final String TRAILER_SIZE = "size";
+    public static final String TRAILER_SOURCE = "key";
+    public static final String TRAILER_TYPE = "type";
+
+    public static final String VALID_TRAILER_TYPE = "Trailer";
+    public static final String VALID_PROVIDER_TYPE = "YouTube";
+    public static final String DUMMY_TRAILER_ID = "com.ferfig.popularmovies.treiler.dummy";
+
     private String mId;
     private String mProvider;
     private String mName;

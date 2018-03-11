@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -51,8 +52,9 @@ public class TrailersRecyclerViewAdapter extends RecyclerView.Adapter<TrailersRe
         return mData.size();
     }
 
-    public class TrailerViewHolder extends RecyclerView.ViewHolder{
+    public class TrailerViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.ivTrailer) ImageView ivTrailer;
         @BindView(R.id.tvTrailerName) TextView tvTrailerName;
 
         public TrailerViewHolder(View trailerItemView) {
@@ -64,15 +66,20 @@ public class TrailersRecyclerViewAdapter extends RecyclerView.Adapter<TrailersRe
         public void bind(final Trailer trailerData, final OnItemClickListener listener) {
             tvTrailerName.setText(trailerData.getName());
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    if (listener!=null) {
-                        listener.onItemClick(trailerData);
+            if (trailerData.getId().equals(Trailer.DUMMY_TRAILER_ID)) {
+                tvTrailerName.setTextAlignment(TextView.TEXT_ALIGNMENT_CENTER);
+                tvTrailerName.setPadding(10,40,10,50);
+                ivTrailer.setVisibility(View.GONE);
+            } else {
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (listener != null) {
+                            listener.onItemClick(trailerData);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
-
     }
-
 }

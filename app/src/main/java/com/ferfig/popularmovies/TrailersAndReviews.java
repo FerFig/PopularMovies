@@ -58,62 +58,63 @@ public class TrailersAndReviews extends AppCompatActivity {
 
     private void showTrailers() {
         ArrayList<Trailer> mTrailerList = sMovieDetails.getTrailers();
-        if (mTrailerList != null && mTrailerList.size() > 0) {
-            TrailersRecyclerViewAdapter rvTrailersAdapter = new TrailersRecyclerViewAdapter(getApplicationContext(), mTrailerList,
-                    new TrailersRecyclerViewAdapter.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(Trailer trailerData) {
-                            Intent playInApp = new Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(UrlUtils.YOUTUBE_APP_URI + trailerData.getSource()));
-                            try {
-                                startActivity(playInApp);
-                            } catch (ActivityNotFoundException ex) {
-                                Intent openInWeb = new Intent(Intent.ACTION_VIEW,
-                                        Uri.parse(UrlUtils.YOUTUBE_WEB_URI + trailerData.getSource()));
-                                startActivity(openInWeb);
-                            }
+        if (mTrailerList == null || mTrailerList.size() == 0) {
+            //add an empty review with custom text :)
+            Trailer dummyTrailer = new Trailer(Trailer.DUMMY_TRAILER_ID, null,
+                    getString(R.string.no_trailers_available), null,
+                    Trailer.VALID_PROVIDER_TYPE, Trailer.VALID_TRAILER_TYPE);
+            mTrailerList = new ArrayList<>();
+            mTrailerList.add(dummyTrailer);
+        }
+        TrailersRecyclerViewAdapter rvTrailersAdapter = new TrailersRecyclerViewAdapter(getApplicationContext(), mTrailerList,
+                new TrailersRecyclerViewAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(Trailer trailerData) {
+                        Intent playInApp = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse(UrlUtils.YOUTUBE_APP_URI + trailerData.getSource()));
+                        try {
+                            startActivity(playInApp);
+                        } catch (ActivityNotFoundException ex) {
+                            Intent openInWeb = new Intent(Intent.ACTION_VIEW,
+                                    Uri.parse(UrlUtils.YOUTUBE_WEB_URI + trailerData.getSource()));
+                            startActivity(openInWeb);
                         }
-                    });
+                    }
+                });
 
-            rvTrailers.setLayoutManager(new LinearLayoutManager(
-                    this,
-                    OrientationHelper.VERTICAL,
-                    false));
+        rvTrailers.setLayoutManager(new LinearLayoutManager(
+                this,
+                OrientationHelper.VERTICAL,
+                false));
 
-            rvTrailers.setAdapter(rvTrailersAdapter);
-        }
-        else{
-            //TODO show message with no reviews text
-            //tvTrailersLabel.setVisibility(View.GONE);
-            //rvTrailers.setVisibility(View.GONE);
-        }
+        rvTrailers.setAdapter(rvTrailersAdapter);
     }
 
     private void showReviews() {
         ArrayList<Review> mReviewsList = sMovieDetails.getReviews();
-        if (mReviewsList != null && mReviewsList.size() > 0) {
-            ReviewsRecyclerViewAdapter rvReviewsAdapter = new ReviewsRecyclerViewAdapter(this, mReviewsList,
-                    new ReviewsRecyclerViewAdapter.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(Review reviewData) {
-                            Intent openInWeb = new Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(reviewData.getUrl()));
-                            startActivity(openInWeb);
-                        }
-                    });
-
-            rvReviews.setLayoutManager(new LinearLayoutManager(
-                    this,
-                    OrientationHelper.VERTICAL,
-                    false));
-
-            rvReviews.setAdapter(rvReviewsAdapter);
+        if (mReviewsList == null || mReviewsList.size() == 0) {
+            //add an empty review with custom text :)
+            Review dummyReview = new Review(Review.DUMMY_REVIEW_ID,
+                    getString(R.string.no_reviews_available),null, null);
+            mReviewsList = new ArrayList<>();
+            mReviewsList.add(dummyReview);
         }
-        else{
-            //TODO show message with no reviews text
-            //tvReviewsLabel.setVisibility(View.GONE);
-            //rvReviews.setVisibility(View.GONE);
-        }
+        ReviewsRecyclerViewAdapter rvReviewsAdapter = new ReviewsRecyclerViewAdapter(this, mReviewsList,
+                new ReviewsRecyclerViewAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(Review reviewData) {
+                        Intent openInWeb = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse(reviewData.getUrl()));
+                        startActivity(openInWeb);
+                    }
+                });
+
+        rvReviews.setLayoutManager(new LinearLayoutManager(
+                this,
+                OrientationHelper.VERTICAL,
+                false));
+
+        rvReviews.setAdapter(rvReviewsAdapter);
     }
 
     @Override

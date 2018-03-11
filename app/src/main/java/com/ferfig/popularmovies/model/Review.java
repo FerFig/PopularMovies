@@ -4,6 +4,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Review  implements Parcelable {
+    public static final String REVIEW_ID = "id";
+    public static final String REVIEW_AUTHOR = "author";
+    public static final String REVIEW_CONTENT = "content";
+    public static final String REVIEW_URL = "url";
+    public static final String DUMMY_REVIEW_ID = "com.ferfig.popmovies.review.dummy";
 
     private String mId;
     private String mAuthor;

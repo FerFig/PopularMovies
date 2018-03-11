@@ -32,4 +32,6 @@
     <string name="reviews_label">Reviews</string>
     <string name="reviewer_label">Reviewer:</string>
     <string name="button_more">More…</string>
+    <string name="no_trailers_available">Oh no!\nNo trailers available for this movie!</string>
+    <string name="no_reviews_available">Oops!\nNo reviews available for this movie!</string>
 </resources>

@@ -9,6 +9,14 @@ public final class MovieData implements Parcelable {
 
     public static final String NO_POSTER = "NO_POSTER";
 
+    public static final String MOVIE_ID = "id";
+    public static final String MOVIE_TITLE = "title";
+    public static final String MOVIE_RELEASE_DATE = "release_date";
+    public static final String MOVIE_POSTER = "poster_path";
+    public static final String MOVIE_BACKDROP_IMAGE = "backdrop_path";
+    public static final String MOVIE_VOTE_AVG = "vote_average";
+    public static final String MOVIE_SYNOPSIS = "overview";
+
     private long mId;
     private String mTitle;
     private String mReleaseDate;

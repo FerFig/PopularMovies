@@ -14,29 +14,6 @@ public final class Json {
 
     private static final String JSON_RESULTS = "results";
 
-    private static final String MOVIE_ID = "id";
-    private static final String MOVIE_TITLE = "title";
-    private static final String MOVIE_RELEASE_DATE = "release_date";
-    private static final String MOVIE_POSTER = "poster_path";
-    private static final String MOVIE_BACKDROP_IMAGE = "backdrop_path";
-    private static final String MOVIE_VOTE_AVG = "vote_average";
-    private static final String MOVIE_SYNOPSIS = "overview";
-
-    private static final String TRAILER_ID = "id";
-    private static final String TRAILER_PROVIDER = "site";
-    private static final String TRAILER_NAME = "name";
-    private static final String TRAILER_SIZE = "size";
-    private static final String TRAILER_SOURCE = "key";
-    private static final String TRAILER_TYPE = "type";
-
-    private static final String VALID_TRAILER_TYPE = "Trailer";
-    private static final String VALID_PROVIDER_TYPE = "YouTube";
-
-    private static final String REVIEW_ID = "id";
-    private static final String REVIEW_AUTHOR = "author";
-    private static final String REVIEW_CONTENT = "content";
-    private static final String REVIEW_URL = "url";
-
     public static ArrayList<MovieData> getMoviesList(String json){
         try {
             JSONObject jsonMainObject = new JSONObject(json);
@@ -59,13 +36,13 @@ public final class Json {
         try {
             JSONObject jsonMainObject = new JSONObject(json);
 
-            long mId = jsonMainObject.optLong(MOVIE_ID);
-            String mTitle = jsonMainObject.optString(MOVIE_TITLE);
-            String mReleaseDate = jsonMainObject.optString(MOVIE_RELEASE_DATE);
-            String mPoster = jsonMainObject.optString(MOVIE_POSTER);
-            String mBackDropImage = jsonMainObject.optString(MOVIE_BACKDROP_IMAGE);
-            String mVoteAverage = jsonMainObject.optString(MOVIE_VOTE_AVG);
-            String mSynopsis = jsonMainObject.optString(MOVIE_SYNOPSIS);
+            long mId = jsonMainObject.optLong(MovieData.MOVIE_ID);
+            String mTitle = jsonMainObject.optString(MovieData.MOVIE_TITLE);
+            String mReleaseDate = jsonMainObject.optString(MovieData.MOVIE_RELEASE_DATE);
+            String mPoster = jsonMainObject.optString(MovieData.MOVIE_POSTER);
+            String mBackDropImage = jsonMainObject.optString(MovieData.MOVIE_BACKDROP_IMAGE);
+            String mVoteAverage = jsonMainObject.optString(MovieData.MOVIE_VOTE_AVG);
+            String mSynopsis = jsonMainObject.optString(MovieData.MOVIE_SYNOPSIS);
 
             return new MovieData(mId, mTitle, mReleaseDate,
                     mPoster, mBackDropImage, mVoteAverage, mSynopsis.trim());
@@ -86,8 +63,8 @@ public final class Json {
                     if (trailer != null) {
                         String tType = trailer.getTrailerType();
                         String tProvider = trailer.getProvider();
-                        if (tType != null && tType.equals(VALID_TRAILER_TYPE)
-                                && tProvider != null && tProvider.equals(VALID_PROVIDER_TYPE)) {
+                        if (tType != null && tType.equals(Trailer.VALID_TRAILER_TYPE)
+                                && tProvider != null && tProvider.equals(Trailer.VALID_PROVIDER_TYPE)) {
                             mTrailers.add(trailer);
                         }
                     }
@@ -105,12 +82,12 @@ public final class Json {
         try {
             JSONObject jsonMainObject = new JSONObject(json);
 
-            String mId = jsonMainObject.optString(TRAILER_ID);
-            String mProvider = jsonMainObject.optString(TRAILER_PROVIDER);
-            String mName = jsonMainObject.optString(TRAILER_NAME);
-            String mSize = jsonMainObject.optString(TRAILER_SIZE);
-            String mSource = jsonMainObject.optString(TRAILER_SOURCE);
-            String mType = jsonMainObject.optString(TRAILER_TYPE);
+            String mId = jsonMainObject.optString(Trailer.TRAILER_ID);
+            String mProvider = jsonMainObject.optString(Trailer.TRAILER_PROVIDER);
+            String mName = jsonMainObject.optString(Trailer.TRAILER_NAME);
+            String mSize = jsonMainObject.optString(Trailer.TRAILER_SIZE);
+            String mSource = jsonMainObject.optString(Trailer.TRAILER_SOURCE);
+            String mType = jsonMainObject.optString(Trailer.TRAILER_TYPE);
 
             return new Trailer(mId, mProvider, mName, mSize, mSource, mType);
         } catch (JSONException e) {
@@ -141,10 +118,10 @@ public final class Json {
         try {
             JSONObject jsonMainObject = new JSONObject(json);
 
-            String mId = jsonMainObject.optString(REVIEW_ID);
-            String mAuthor = jsonMainObject.optString(REVIEW_AUTHOR);
-            String mContent = jsonMainObject.optString(REVIEW_CONTENT);
-            String mURL = jsonMainObject.optString(REVIEW_URL);
+            String mId = jsonMainObject.optString(Review.REVIEW_ID);
+            String mAuthor = jsonMainObject.optString(Review.REVIEW_AUTHOR);
+            String mContent = jsonMainObject.optString(Review.REVIEW_CONTENT);
+            String mURL = jsonMainObject.optString(Review.REVIEW_URL);
 
             return new Review(mId, mAuthor, mContent.trim(), mURL);
         } catch (JSONException e) {
