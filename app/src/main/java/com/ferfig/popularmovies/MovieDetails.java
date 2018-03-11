@@ -11,9 +11,11 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -62,6 +64,11 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
+
+        ActionBar ab = this.getSupportActionBar();
+        if (ab !=null) {
+            ab.setDisplayHomeAsUpEnabled(true);
+        }
 
         ButterKnife.bind(this);
 
@@ -311,6 +318,16 @@ Log.w(Utils.APP_TAG, "DetailActivity: showMovieDetails");
                     R.mipmap.ic_favorite_off_foreground).into(ivFavorite);
         }
         if (nCursor != null) nCursor.close();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            onBackPressed();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
