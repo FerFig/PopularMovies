@@ -10,7 +10,7 @@
         android:id="@+id/tvReviewerLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:text="@string/reviewer_label"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
@@ -25,33 +25,39 @@
         android:layout_marginStart="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textColor="@color/colorAccent"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/tvReviewerLabel"
         app:layout_constraintStart_toEndOf="@+id/tvReviewerLabel"
         app:layout_constraintTop_toBottomOf="@+id/tvReviewerLabel"
         tools:text="Fernando Figueiredo"/>
 
     <TextView
-        android:id="@+id/tvReviewLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/review_label"
-        android:textColor="@color/colorPrimaryDark"
-        app:layout_constraintStart_toStartOf="@+id/tvReviewerLabel"
-        app:layout_constraintTop_toBottomOf="@+id/tvReviewerLabel"/>
-
-    <TextView
         android:id="@+id/tvReview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:maxHeight="70dp"
         android:textColor="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/tvReviewerLabel"
-        app:layout_constraintTop_toBottomOf="@+id/tvReviewLabel"
+        app:layout_constraintTop_toBottomOf="@+id/tvReviewer"
         tools:text="sdkfjaklsdj fhasdlkj dsfklhasdkjfh alsdkjfh apsdgjkh aghadfjkgh akdfjgh dfjklgh kdfjgh sdklfjgh sdfjkgh sdkfjgh sdfkjghsdfkjgh sdfkjgh sdfkjlgh dfkljgh sdfjkgh dfkjgh lsdkfjgh sdfkljgh sdkfjgh dfjklghkrh gpowig +e5hsdrhgpaurgh iaseugh isugh fh asdjkfh asdkjfh askldjfh askdjfh asdkjfh asdkjfh asdkjfh asdkjfh askdjfh askdljfh askldf h"/>
+
+    <ImageView
+        android:id="@+id/imReviewsSeparator"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@+id/tvReview"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@color/colorPrimaryDark"/>
 
 </android.support.constraint.ConstraintLayout>

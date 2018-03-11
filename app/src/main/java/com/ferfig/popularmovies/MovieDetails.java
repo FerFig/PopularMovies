@@ -1,7 +1,6 @@
 package com.ferfig.popularmovies;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,18 +13,14 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.OrientationHelper;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ferfig.popularmovies.model.MovieData;
 import com.ferfig.popularmovies.model.MoviesContract;
-import com.ferfig.popularmovies.model.Review;
-import com.ferfig.popularmovies.model.Trailer;
 import com.ferfig.popularmovies.utils.Json;
 import com.ferfig.popularmovies.utils.Network;
 import com.ferfig.popularmovies.utils.UrlUtils;
@@ -33,7 +28,6 @@ import com.ferfig.popularmovies.utils.Utils;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,6 +40,8 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
     private static final int MOVIE_REVIEWS_LOADER_ID = 29;
 
     private MovieData mMovieDetails;
+    private boolean mTrailersRetrieved;
+    private boolean mReviewsRetrieved;
 
     @SuppressWarnings("WeakerAccess")
     @BindView(R.id.ivPoster) ImageView ivPoster;
@@ -59,19 +55,8 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
     @BindView(R.id.tvSynopsis) TextView tvSynopsis;
     @SuppressWarnings("WeakerAccess")
     @BindView(R.id.ivFavorite) ImageView ivFavorite;
-
     @SuppressWarnings("WeakerAccess")
-    @BindView(R.id.tvTrailersLabel) TextView tvTrailersLabel;
-    @SuppressWarnings("WeakerAccess")
-    @BindView(R.id.rvTrailers) RecyclerView rvTrailers;
-    @SuppressWarnings("WeakerAccess")
-    @BindView(R.id.imTrailersSeparator) ImageView imTrailersSeparator;
-    @SuppressWarnings("WeakerAccess")
-    @BindView(R.id.tvReviewsLabel) TextView tvReviewsLabel;
-    @SuppressWarnings("WeakerAccess")
-    @BindView(R.id.imReviewsSeparator) ImageView imReviewsSeparator;
-    @SuppressWarnings("WeakerAccess")
-    @BindView(R.id.rvReviews) RecyclerView rvReviews;
+    @BindView(R.id.btTrailersAndReviews) Button btMoreDetailsButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +70,7 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
             mMovieDetails = receivedIntent.getParcelableExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT);
 Log.w(Utils.APP_TAG, "DetailActivity: onCreate without savedInstanceState");
             //Check if it's a Favorite movie
-            setMovieHasFavorite();
+            checkIfMovieIsFavorite();
             //Also, need to get extra data (Trailers and Reviews...)
             getDetailsFromMovieDB();
         }
@@ -139,6 +124,13 @@ Log.w(Utils.APP_TAG, "DetailActivity: retrieving more movie details -> getDetail
     @Override
     public Loader<String> onCreateLoader(int id, Bundle bundle) {
         return new MovieDetailsAsyncLoader(this, bundle);
+    }
+
+    @SuppressWarnings("unused")
+    public void showMoreDetailsActivity(View view) {
+        Intent intent = new Intent(getApplicationContext(), TrailersAndReviews.class);
+        intent.putExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT, mMovieDetails);
+        startActivity(intent);
     }
 
     private static class MovieDetailsAsyncLoader extends AsyncTaskLoader<String> {
@@ -195,11 +187,13 @@ Log.w(Utils.APP_TAG, "DetailActivity: retrieving more movie details -> getDetail
             switch (loader.getId()) {
                 case MOVIE_TRAILERS_LOADER_ID:
                     mMovieDetails.setTrailers(Json.getTrailersList(data));
-                    showTrailers();
+                    mTrailersRetrieved = true;
+                    setMoreDetailsButton();
                     break;
                 case MOVIE_REVIEWS_LOADER_ID:
                     mMovieDetails.setReviews(Json.getReviewsList(data));
-                    showReviews();
+                    mReviewsRetrieved = true;
+                    setMoreDetailsButton();
                     break;
             }
         }
@@ -208,6 +202,13 @@ Log.w(Utils.APP_TAG, "DetailActivity: retrieving more movie details -> getDetail
     @Override
     public void onLoaderReset(@NonNull Loader<String> loader) {
 
+    }
+
+    private void setMoreDetailsButton() {
+        if (mTrailersRetrieved && mReviewsRetrieved) {
+            btMoreDetailsButton.setVisibility(View.VISIBLE);
+            btMoreDetailsButton.setEnabled(true);
+        }
     }
 
     private void showMovieDetails() {
@@ -239,75 +240,7 @@ Log.w(Utils.APP_TAG, "DetailActivity: showMovieDetails");
                 Picasso.with(this).load(
                         R.mipmap.ic_favorite_off_foreground).into(ivFavorite);
             }
-
-            showTrailersAndReviews();
-        }
-    }
-
-    private void showTrailersAndReviews() {
-        showTrailers();
-        showReviews();
-    }
-
-    private void showTrailers() {
-        List<Trailer> mTrailerList = mMovieDetails.getTrailers();
-        if (mTrailerList != null && mTrailerList.size() > 0) {
-            TrailersRecyclerViewAdapter rvTrailersAdapter = new TrailersRecyclerViewAdapter(getApplicationContext(), mTrailerList,
-                    new TrailersRecyclerViewAdapter.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(Trailer trailerData) {
-                            Intent playInApp = new Intent(Intent.ACTION_VIEW,
-                                    Uri.parse(UrlUtils.YOUTUBE_APP_URI + trailerData.getSource()));
-                            try {
-                                startActivity(playInApp);
-                            } catch (ActivityNotFoundException ex) {
-                                Intent openInWeb = new Intent(Intent.ACTION_VIEW,
-                                        Uri.parse(UrlUtils.YOUTUBE_WEB_URI + trailerData.getSource()));
-                                startActivity(openInWeb);
-                            }
-                        }
-                    });
-
-            rvTrailers.setLayoutManager(new LinearLayoutManager(
-                    this,
-                    OrientationHelper.VERTICAL,
-                    false));
-
-            rvTrailers.setAdapter(rvTrailersAdapter);
-
-            imTrailersSeparator.setVisibility(View.VISIBLE);
-            tvTrailersLabel.setVisibility(View.VISIBLE);
-            rvTrailers.setVisibility(View.VISIBLE);
-        }
-        else{
-            //cant make them GONE because of the constraints, else we had to set the related view constraints...
-            imTrailersSeparator.setVisibility(View.INVISIBLE);
-            tvTrailersLabel.setVisibility(View.INVISIBLE);
-            rvTrailers.setVisibility(View.INVISIBLE);
-        }
-    }
-
-    private void showReviews() {
-        List<Review> mReviewsList = mMovieDetails.getReviews();
-        if (mReviewsList != null && mReviewsList.size() > 0) {
-            ReviewsRecyclerViewAdapter rvReviewsAdapter = new ReviewsRecyclerViewAdapter(this, mReviewsList);
-
-            rvReviews.setLayoutManager(new LinearLayoutManager(
-                    this,
-                    OrientationHelper.VERTICAL,
-                    false));
-
-            rvReviews.setAdapter(rvReviewsAdapter);
-
-            imReviewsSeparator.setVisibility(View.VISIBLE);
-            tvReviewsLabel.setVisibility(View.VISIBLE);
-            rvReviews.setVisibility(View.VISIBLE);
-        }
-        else{
-            //cant make them GONE because of the constraints, else we had to set the related view constraints...
-            imReviewsSeparator.setVisibility(View.GONE);
-            tvReviewsLabel.setVisibility(View.GONE);
-            rvReviews.setVisibility(View.GONE);
+            setMoreDetailsButton();
         }
     }
 
@@ -356,7 +289,7 @@ Log.w(Utils.APP_TAG, "DetailActivity: showMovieDetails");
         return nDeleted>0;
     }
 
-    private void setMovieHasFavorite() {
+    private void checkIfMovieIsFavorite() {
         ContentResolver cr = getContentResolver();
         long movieId = mMovieDetails.getId();
         Uri movieToGet = MoviesContract.MoviesEntry.buildMoviesUri(movieId);
@@ -378,7 +311,7 @@ Log.w(Utils.APP_TAG, "DetailActivity: showMovieDetails");
     public void onBackPressed() {
         Intent returnIntent = getIntent();
         if (!mMovieDetails.isFavorite()) {
-            //we only need to delete movie when is not favorite anymore and the view is displying favorites
+            //we only need to delete movie when is not favorite anymore and the view is displaying favorites
             returnIntent.putExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT, mMovieDetails);
             setResult(Activity.RESULT_OK, returnIntent);
         }else{

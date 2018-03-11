@@ -15,11 +15,13 @@
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-            android:textColor="@color/colorAccent"
+            android:background="@color/colorAccent"
+            android:textAllCaps="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:textColor="@android:color/white"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -29,7 +31,8 @@
             android:id="@+id/ivPoster"
             android:layout_width="210dp"
             android:layout_height="315dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:contentDescription="@string/detail_movie_poster_image_content_description"
             app:layout_constraintStart_toStartOf="@+id/tvTitle"
             app:layout_constraintTop_toBottomOf="@+id/tvTitle"
@@ -40,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:text="@string/rel_date_label"
             android:textColor="@color/colorPrimaryDark"
             app:layout_constraintStart_toEndOf="@+id/ivPoster"
@@ -92,7 +95,7 @@
             android:id="@+id/tvSynopsis"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginTop="8dp"
             android:textColor="@color/colorAccent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -113,92 +116,35 @@
             app:layout_constraintTop_toBottomOf="@+id/tvSynopsisLabel"
             app:srcCompat="@color/colorPrimaryDark"/>
 
-        <TextView
-            android:id="@+id/tvTrailersLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/trailers_label"
-            android:textColor="@color/colorPrimaryDark"
-            app:layout_constraintStart_toStartOf="@+id/tvSynopsis"
-            app:layout_constraintTop_toBottomOf="@+id/tvSynopsis"
-            />
-
-        <ImageView
-            android:id="@+id/imTrailersSeparator"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:background="@color/colorPrimary"
-            app:layout_constraintBottom_toTopOf="@+id/tvTrailersLabel"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/tvTrailersLabel"
-            app:layout_constraintTop_toBottomOf="@+id/tvTrailersLabel"
-            app:srcCompat="@color/colorPrimaryDark"/>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rvTrailers"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/tvTrailersLabel"
-            app:layout_constraintTop_toBottomOf="@+id/tvTrailersLabel">
-        </android.support.v7.widget.RecyclerView>
-
-        <TextView
-            android:id="@+id/tvReviewsLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/reviews_label"
-            android:textColor="@color/colorPrimaryDark"
-            app:layout_constraintStart_toStartOf="@+id/rvTrailers"
-            app:layout_constraintTop_toBottomOf="@+id/rvTrailers"
-            />
-
-        <ImageView
-            android:id="@+id/imReviewsSeparator"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:background="@color/colorPrimary"
-            app:layout_constraintBottom_toTopOf="@+id/tvReviewsLabel"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/tvReviewsLabel"
-            app:layout_constraintTop_toBottomOf="@+id/tvReviewsLabel"
-            app:srcCompat="@color/colorPrimaryDark"/>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rvReviews"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/tvReviewsLabel"
-            app:layout_constraintTop_toBottomOf="@+id/tvReviewsLabel">
-        </android.support.v7.widget.RecyclerView>
-
         <ImageView
             android:id="@+id/ivFavorite"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:adjustViewBounds="false"
             android:clickable="true"
             android:cropToPadding="false"
             android:focusable="true"
             android:onClick="toogleFavorite"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btTrailersAndReviews"
+            app:layout_constraintStart_toEndOf="@+id/btTrailersAndReviews"
             app:layout_constraintTop_toBottomOf="@+id/tvAvgRate"
             app:srcCompat="@mipmap/ic_favorite_on_foreground"/>
+
+        <Button
+            android:id="@+id/btTrailersAndReviews"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:onClick="showMoreDetailsActivity"
+            android:text="@string/button_more"
+            android:visibility="invisible"
+            android:enabled="false"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintBottom_toBottomOf="@+id/ivPoster"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     </android.support.constraint.ConstraintLayout>
 </ScrollView>

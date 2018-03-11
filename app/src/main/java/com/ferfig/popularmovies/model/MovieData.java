@@ -66,6 +66,7 @@ public final class MovieData implements Parcelable {
         dest.writeString(Boolean.toString(mFavorite));
     }
 
+    @SuppressWarnings("unused")
     public static final Creator<MovieData> CREATOR = new Creator<MovieData>() {
         @Override
         public MovieData createFromParcel(Parcel in) {

@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ferfig.popularmovies.model.Review;
@@ -26,10 +27,10 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
     }
     private final OnItemClickListener itemClickListener;
 
-    public ReviewsRecyclerViewAdapter(Context mContext, List<Review> mData) {
+    public ReviewsRecyclerViewAdapter(Context mContext, List<Review> mData, OnItemClickListener onItemClickListener) {
         this.mContext = mContext;
         this.mData = mData;
-        this.itemClickListener = null;
+        this.itemClickListener = onItemClickListener;
     }
 
     @NonNull
@@ -54,6 +55,7 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
 
         @BindView(R.id.tvReviewer) TextView tvReviewer;
         @BindView(R.id.tvReview) TextView tvReview;
+        @BindView(R.id.imReviewsSeparator) ImageView imReviewsSeparator;
 
         public ReviewViewHolder(View reviewItemView) {
             super(reviewItemView);
@@ -64,6 +66,9 @@ public class ReviewsRecyclerViewAdapter extends RecyclerView.Adapter<ReviewsRecy
         public void bind(final Review reviewData, final OnItemClickListener listener) {
             tvReviewer.setText(reviewData.getAuthor());
             tvReview.setText(reviewData.getContent());
+            if (getAdapterPosition() == mData.size()-1) {//last one is not needed to have separator ;)
+                imReviewsSeparator.setVisibility(View.INVISIBLE);
+            }
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
