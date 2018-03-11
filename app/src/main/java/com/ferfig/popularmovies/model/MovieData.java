@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public final class MovieData implements Parcelable {
 
     public static final String NO_POSTER = "NO_POSTER";
+
     private long mId;
     private String mTitle;
     private String mReleaseDate;
@@ -23,6 +24,7 @@ public final class MovieData implements Parcelable {
 
     private static final String IMAGES_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String POSTER_WSIZE = "w185/";
+    private static final String NULL_RESULT = "null";
 
     public MovieData(long id, String title, String release_date, String poster, String backdrop_image, String vote_average, String synopsis){
         this.setId(id);
@@ -59,8 +61,8 @@ public final class MovieData implements Parcelable {
         dest.writeString(mBackDropImage);
         dest.writeString(mVoteAverage);
         dest.writeString(mSynopsis);
-        dest.writeList(mTrailers);
-        dest.writeList(mReviews);
+        dest.writeTypedList(mTrailers);
+        dest.writeTypedList(mReviews);
         dest.writeString(Boolean.toString(mFavorite));
     }
 
@@ -119,7 +121,7 @@ public final class MovieData implements Parcelable {
     }
 
     public String getDrawablePoster() {
-        if (!(mPoster.equals("null"))) {
+        if (!(mPoster.equals(NULL_RESULT))) {
             return IMAGES_BASE_URL + POSTER_WSIZE + mPoster;
         }else{
             //return backdrop when poster doesn't exist
@@ -129,7 +131,7 @@ public final class MovieData implements Parcelable {
 
     @SuppressWarnings("WeakerAccess")
     public String getDrawableBackDropImage() {
-        if (!(mBackDropImage.equals("null"))) {
+        if (!(mBackDropImage.equals(NULL_RESULT))) {
             return IMAGES_BASE_URL + POSTER_WSIZE + mBackDropImage;
         }
         else{
