@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<A
     private static final int ID_FOR_ACTIVITY_RESULT = 9;
 
     private ArrayList<MovieData> mMoviesList;
-    private int mCurrentSortOrder;
+    private int mCurrentOptionSelected;
 
     @SuppressWarnings("WeakerAccess")
     @BindView(R.id.rvMainRecyclerView) RecyclerView mMainRecyclerView;
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<A
 
         //get selected movies option and also register for preference change
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mCurrentSortOrder = Integer.valueOf(
+        mCurrentOptionSelected = Integer.valueOf(
                 sharedPreferences.getString(getString(R.string.pref_view_by),
                 String.valueOf(Utils.MODE_POPULAR)));
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
@@ -75,7 +75,7 @@ Log.w(Utils.APP_TAG, "MainActivity: onCreate with null savedInstanceState");
         }
         else{
             int lastSortOrder = savedInstanceState.getInt(Utils.CURRENT_VIEW_TYPE);
-            if (mCurrentSortOrder==lastSortOrder) {
+            if (mCurrentOptionSelected ==lastSortOrder) {
 Log.w(Utils.APP_TAG, "MainActivity: onCreate with savedInstanceState restored");
                 mMoviesList = savedInstanceState.getParcelableArrayList(Utils.ALL_MOVIES_DATA_OBJECT);
 
@@ -90,7 +90,7 @@ Log.w(Utils.APP_TAG, "MainActivity: onCreate with savedInstanceState but differe
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt(Utils.CURRENT_VIEW_TYPE, mCurrentSortOrder);
+        outState.putInt(Utils.CURRENT_VIEW_TYPE, mCurrentOptionSelected);
         outState.putParcelableArrayList(Utils.ALL_MOVIES_DATA_OBJECT, mMoviesList);
 
         super.onSaveInstanceState(outState);
@@ -104,7 +104,7 @@ Log.w(Utils.APP_TAG, "MainActivity: savedInstanceState saved");
             LoaderCallbacks<ArrayList<MovieData>> callback = MainActivity.this;
 
             Bundle bundleForLoader = new Bundle();
-            bundleForLoader.putInt(Utils.CURRENT_VIEW_TYPE, mCurrentSortOrder);
+            bundleForLoader.putInt(Utils.CURRENT_VIEW_TYPE, mCurrentOptionSelected);
 
             Loader<String> moviesLoaderFromWeb = getSupportLoaderManager().getLoader(MoviesAsyncLoader.MOVIEDB_LOADER_ID);
             if (moviesLoaderFromWeb != null) {
@@ -126,7 +126,7 @@ Log.w(Utils.APP_TAG, "MainActivity: getDataFromMovieDB: initLoader");
         LoaderCallbacks<ArrayList<MovieData>> callback = MainActivity.this;
 
         Bundle bundleForLoader = new Bundle();
-        bundleForLoader.putInt(Utils.CURRENT_VIEW_TYPE, mCurrentSortOrder);
+        bundleForLoader.putInt(Utils.CURRENT_VIEW_TYPE, mCurrentOptionSelected);
 
         Loader<String> moviesLoaderFromLocalDB = getSupportLoaderManager().getLoader(MoviesAsyncLoader.LOCALDB_LOADER_ID);
         if (moviesLoaderFromLocalDB!=null){
@@ -255,10 +255,10 @@ Log.w(Utils.APP_TAG, "MainActivity: onSharedPreferenceChanged...");
             int currentVal = Integer.valueOf(
                     sharedPreferences.getString(getString(R.string.pref_view_by),
                             String.valueOf(Utils.MODE_POPULAR)));
-            if (mCurrentSortOrder != currentVal){
+            if (mCurrentOptionSelected != currentVal){
                 //if it has changed...
 Log.w(Utils.APP_TAG, "MainActivity: ... retrieving new data");
-                mCurrentSortOrder = currentVal;
+                mCurrentOptionSelected = currentVal;
 
                 setMainScreenTitle();
 
@@ -271,7 +271,7 @@ Log.w(Utils.APP_TAG, "MainActivity: ... retrieving new data");
     }
 
     private void setMainScreenTitle() {
-        switch (mCurrentSortOrder){
+        switch (mCurrentOptionSelected){
             default:
             case Utils.MODE_POPULAR:
                 setTitle(R.string.app_title_popular);
@@ -286,7 +286,7 @@ Log.w(Utils.APP_TAG, "MainActivity: ... retrieving new data");
     }
 
     private void getNewMoviesData() {
-        switch (mCurrentSortOrder) {
+        switch (mCurrentOptionSelected) {
             case Utils.MODE_FAVORITES:
 Log.w(Utils.APP_TAG, "MainActivity: calling getDataFromLocalDB()");
                 getDataFromLocalDB();
@@ -331,7 +331,7 @@ Log.w(Utils.APP_TAG, "MainActivity: showMovieGrid: " );
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == ID_FOR_ACTIVITY_RESULT) {
             // Make sure the request was successful
-            if (resultCode == RESULT_OK && mCurrentSortOrder == Utils.MODE_FAVORITES) {
+            if (resultCode == RESULT_OK && mCurrentOptionSelected == Utils.MODE_FAVORITES) {
                 //check if movie was removed from favorites and remove it also from the main screen
                 MovieData returnedMovieData = intent.getParcelableExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT);
                 if (!returnedMovieData.isFavorite()) {
