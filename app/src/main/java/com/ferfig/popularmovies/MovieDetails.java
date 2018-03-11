@@ -67,17 +67,23 @@ public class MovieDetails extends AppCompatActivity implements LoaderManager.Loa
 
         if (savedInstanceState == null) {
             Intent receivedIntent = getIntent();
-            mMovieDetails = receivedIntent.getParcelableExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT);
+            if (receivedIntent != null && receivedIntent.hasExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT)) {
+                mMovieDetails = receivedIntent.getParcelableExtra(Utils.SINGLE_MOVIE_DETAILS_OBJECT);
 Log.w(Utils.APP_TAG, "DetailActivity: onCreate without savedInstanceState");
-            //Check if it's a Favorite movie
-            checkIfMovieIsFavorite();
-            //Also, need to get extra data (Trailers and Reviews...)
-            getDetailsFromMovieDB();
+                //Check if it's a Favorite movie
+                checkIfMovieIsFavorite();
+                //Also, need to get extra data (Trailers and Reviews...)
+                getDetailsFromMovieDB();
+            }
+            else{//is not supposed too...
+                finish();
+            }
         }
         else
         {
 Log.w(Utils.APP_TAG, "DetailActivity: onCreate restored from savedInstanceState");
             mMovieDetails = savedInstanceState.getParcelable(Utils.SINGLE_MOVIE_DETAILS_OBJECT);
+            mTrailersRetrieved = mReviewsRetrieved = true;
         }
         showMovieDetails();
     }
